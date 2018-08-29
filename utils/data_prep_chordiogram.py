@@ -168,7 +168,7 @@ def create_chordiogram_h5(file_num, batch_size, classes, paths, output_path, num
         mesh.vertices /= np.linalg.norm(mesh.vertices, axis=1).max()
 
         chr = METHODS[chord_type]['function'](mesh, num_samples=num_samples)
-        data[i, :, :] = chr
+        data[i, :, :] = np.nan_to_num(chr)
 
         path = os.path.normpath(f)
         s = path.split(os.sep)[-3]
