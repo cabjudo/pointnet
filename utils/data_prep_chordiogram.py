@@ -223,9 +223,9 @@ if __name__ == '__main__':
 
     num_h5 = int(np.ceil(len(all_paths) / args.batch_size))
     d = args.batch_size
-    #Parallel(n_jobs=-1, timeout=600)(
-    #    delayed(create_chordiogram_h5)(i, d, classes, all_paths[i * d:(i + 1) * d], args.output_dataset, args.num_samples, args.chord_type, args.mode)
-    #    for i in range(num_h5))
+    Parallel(n_jobs=-1, timeout=600)(
+        delayed(create_chordiogram_h5)(i, d, classes, all_paths[i * d:(i + 1) * d], args.output_dataset, args.num_samples, args.chord_type, args.mode)
+        for i in range(num_h5))
 
-    for i in range(num_h5):
-        create_chordiogram_h5(i, d, classes, all_paths[i * d:(i + 1) * d], args.output_dataset, args.num_samples, args.chord_type, args.mode)
+    #for i in range(num_h5):
+    #    create_chordiogram_h5(i, d, classes, all_paths[i * d:(i + 1) * d], args.output_dataset, args.num_samples, args.chord_type, args.mode)
