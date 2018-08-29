@@ -8,49 +8,55 @@ import trimesh
 import h5py
 from joblib import Parallel, delayed
 
+
 def cartesian2spherical(x, y, z, r=None):
     if r is None:
-        r = np.sqrt(x**2 + y**2 + z**2)
+        r = np.sqrt(x ** 2 + y ** 2 + z ** 2)
 
     theta = np.arctan2(y, x)
     phi = np.arccos(z / r)
+    phi = np.nan_to_num(phi)
 
     return r, theta, phi
 
-def get_chords2(mesh, num_samples=100):
 
+def _get_chords_info(mesh, num_samples):
     num_sample_faces = num_samples
-    num_chords = num_sample_faces*(num_sample_faces - 1)
-    chrs = np.zeros((num_chords, 3))
-
     if mesh.faces.shape[0] < num_sample_faces:
         sample_faces = mesh.faces
         num_sample_faces = mesh.faces.shape[0]
-        num_chords = num_sample_faces * (num_sample_faces - 1)
-        normals = mesh.face_normals
+        normals = -mesh.face_normals
     else:
         idx = np.arange(mesh.faces.shape[0])
         np.random.shuffle(idx)
         sample_faces = mesh.faces[idx[:num_sample_faces], :]
         normals = -mesh.face_normals[idx[:num_sample_faces], :]
-
     point1 = mesh.vertices[sample_faces[:, 0], :]
     point2 = mesh.vertices[sample_faces[:, 1], :]
     point3 = mesh.vertices[sample_faces[:, 2], :]
-
     c = (point1 + point2 + point3) / 3.0
-
-    m_x = np.dot(c[:, 0][:, None], np.ones((1, num_sample_faces))) - np.dot(np.ones((num_sample_faces, 1)), c[:, 0][None])
-    m_y = np.dot(c[:, 1][:, None], np.ones((1, num_sample_faces))) - np.dot(np.ones((num_sample_faces, 1)), c[:, 1][None])
-    m_z = np.dot(c[:, 2][:, None], np.ones((1, num_sample_faces))) - np.dot(np.ones((num_sample_faces, 1)), c[:, 2][None])
+    m_x = np.dot(c[:, 0][:, None], np.ones((1, num_sample_faces))) - np.dot(np.ones((num_sample_faces, 1)),
+                                                                            c[:, 0][None])
+    m_y = np.dot(c[:, 1][:, None], np.ones((1, num_sample_faces))) - np.dot(np.ones((num_sample_faces, 1)),
+                                                                            c[:, 1][None])
+    m_z = np.dot(c[:, 2][:, None], np.ones((1, num_sample_faces))) - np.dot(np.ones((num_sample_faces, 1)),
+                                                                            c[:, 2][None])
     m = np.stack((m_x, m_y, m_z), axis=2)
-
     n_x = np.dot(np.ones((num_sample_faces, 1)), normals[:, 0][None])
     n_y = np.dot(np.ones((num_sample_faces, 1)), normals[:, 1][None])
     n_z = np.dot(np.ones((num_sample_faces, 1)), normals[:, 2][None])
-    n = np.stack((n_x, n_y, n_z), axis=2)
+    n_p = np.stack((n_x, n_y, n_z), axis=2)
+    n_q = np.transpose(n_p, (1, 0, 2))
 
-    r = np.sqrt(np.sum(m**2, axis=2))
+    return m, n_p, n_q, num_sample_faces, sample_faces
+
+
+def get_chords1(mesh, num_samples=100):
+    m, n_p, n_q, num_sample_faces, sample_faces = _get_chords_info(mesh, num_samples)
+    num_chords = num_sample_faces * (num_sample_faces - 1)
+    chrs = np.zeros((num_samples*(num_samples-1), 7))
+
+    r = np.sqrt(np.sum(m ** 2, axis=2))
 
     idx = np.arange(num_sample_faces), np.arange(num_sample_faces)
     idx = idx[0] * sample_faces.shape[0] + idx[1]
@@ -59,53 +65,32 @@ def get_chords2(mesh, num_samples=100):
     chrs[0:num_chords, 0] = np.delete(r.ravel(), idx)
 
     # chord orientation
-    ori = np.arccos(np.sum(m*n, axis=2) / (np.linalg.norm(m, axis=2)*np.linalg.norm(n, axis=2)))
-    ori = np.delete(ori.ravel(), idx)
-    chrs[0:num_chords, 1] = ori
+    r, theta, phi = cartesian2spherical(m[:, :, 0], m[:, :, 1], m[:, :, 2], r=r)
+    theta = np.delete(theta.ravel(), idx)
+    phi = np.delete(phi.ravel(), idx)
+    chrs[0:num_chords, 1:3] = np.vstack((theta, phi)).T
 
     # chord normalized normal on p
-    plane1 = np.cross(n, m).T
-    ori_q = np.arccos(np.sum(plane1 * n.T, axis=2) / (np.linalg.norm(plane1, axis=2) * np.linalg.norm(n.T, axis=2)))
-    ori_q = np.delete(ori_q.ravel(), idx)
-    chrs[0:num_chords, 2] = ori_q
+    r, theta, phi = cartesian2spherical(n_p[:, :, 0], n_p[:, :, 1], n_p[:, :, 2])
+    theta = np.delete(theta.ravel(), idx)
+    phi = np.delete(phi.ravel(), idx)
+    chrs[0:num_chords, 3:5] = np.vstack((theta, phi)).T - chrs[0:num_chords, 1:3]
+
+    # chord normalized normal on q
+    r, theta, phi = cartesian2spherical(n_q[:, :, 0], n_q[:, :, 1], n_q[:, :, 2], r=r)
+    theta = np.delete(theta.ravel(), idx)
+    phi = np.delete(phi.ravel(), idx)
+    chrs[0:num_chords, 5:7] = np.vstack((theta, phi)).T - chrs[0:num_chords, 1:3]
 
     return chrs
 
 
-def get_chords3(mesh, num_samples=100):
+def get_chords2(mesh, num_samples=100):
+    m, n_p, n_q, num_sample_faces, sample_faces = _get_chords_info(mesh, num_samples)
+    num_chords = num_sample_faces * (num_sample_faces - 1)
+    chrs = np.zeros((num_samples * (num_samples - 1), 3))
 
-    num_sample_faces = num_samples
-    num_chords = num_sample_faces*(num_sample_faces - 1)
-    chrs = np.zeros((num_chords, 3))
-
-    if mesh.faces.shape[0] < num_sample_faces:
-        sample_faces = mesh.faces
-        num_sample_faces = mesh.faces.shape[0]
-        num_chords = num_sample_faces * (num_sample_faces - 1)
-        normals = mesh.face_normals
-    else:
-        idx = np.arange(mesh.faces.shape[0])
-        np.random.shuffle(idx)
-        sample_faces = mesh.faces[idx[:num_sample_faces], :]
-        normals = -mesh.face_normals[idx[:num_sample_faces], :]
-
-    point1 = mesh.vertices[sample_faces[:, 0], :]
-    point2 = mesh.vertices[sample_faces[:, 1], :]
-    point3 = mesh.vertices[sample_faces[:, 2], :]
-
-    c = (point1 + point2 + point3) / 3.0
-
-    m_x = np.dot(c[:, 0][:, None], np.ones((1, num_sample_faces))) - np.dot(np.ones((num_sample_faces, 1)), c[:, 0][None])
-    m_y = np.dot(c[:, 1][:, None], np.ones((1, num_sample_faces))) - np.dot(np.ones((num_sample_faces, 1)), c[:, 1][None])
-    m_z = np.dot(c[:, 2][:, None], np.ones((1, num_sample_faces))) - np.dot(np.ones((num_sample_faces, 1)), c[:, 2][None])
-    m = np.stack((m_x, m_y, m_z), axis=2)
-
-    n_x = np.dot(np.ones((num_sample_faces, 1)), normals[:, 0][None])
-    n_y = np.dot(np.ones((num_sample_faces, 1)), normals[:, 1][None])
-    n_z = np.dot(np.ones((num_sample_faces, 1)), normals[:, 2][None])
-    n = np.stack((n_x, n_y, n_z), axis=2)
-
-    r = np.sqrt(np.sum(m**2, axis=2))
+    r = np.sqrt(np.sum(m ** 2, axis=2))
 
     idx = np.arange(num_sample_faces), np.arange(num_sample_faces)
     idx = idx[0] * sample_faces.shape[0] + idx[1]
@@ -113,33 +98,65 @@ def get_chords3(mesh, num_samples=100):
     # length of the chord
     chrs[0:num_chords, 0] = np.delete(r.ravel(), idx)
 
-    # chord orientation 1
-    ori_p = np.sum(m*n, axis=2) / (np.linalg.norm(m, axis=2)*np.linalg.norm(n, axis=2))
+    # Angle of normal on p with respect to the chord
+    # https://www.vitutor.com/geometry/distance/line_plane.html
+    ori_p = np.sum(m * n_p, axis=2) / (np.linalg.norm(m, axis=2) * np.linalg.norm(n_p, axis=2))
     ori_p = np.delete(ori_p.ravel(), idx)
     chrs[0:num_chords, 1] = ori_p
 
-    # chord orientation 1
-    ori_q = np.sum(- m * n.T, axis=2) / (np.linalg.norm(m, axis=2) * np.linalg.norm(n.T, axis=2))
+    # Angle of the normal on q with respect to the plane generated by the normal on p and the chord
+    plane1 = np.cross(n_p, m)
+    ori_q = np.arcsin(np.sum(plane1 * n_q, axis=2) / (np.linalg.norm(plane1, axis=2) * np.linalg.norm(n_q, axis=2)))
     ori_q = np.delete(ori_q.ravel(), idx)
     chrs[0:num_chords, 2] = ori_q
 
-    # chord normalized normal on p
-    plane_p = np.cross(n, m).T
-    plane_q = np.cross(n.T, -m).T
-    plane_angle = np.sum(plane_p * plane_q, axis=2) / (np.linalg.norm(plane_p, axis=2) * np.linalg.norm(plane_q, axis=2))
+    return chrs
+
+
+def get_chords3(mesh, num_samples=100):
+    m, n_p, n_q, num_sample_faces, sample_faces = _get_chords_info(mesh, num_samples)
+    num_chords = num_sample_faces * (num_sample_faces - 1)
+    chrs = np.zeros((num_samples * (num_samples - 1), 4))
+
+    r = np.sqrt(np.sum(m ** 2, axis=2))
+
+    idx = np.arange(num_sample_faces), np.arange(num_sample_faces)
+    idx = idx[0] * sample_faces.shape[0] + idx[1]
+
+    # length of the chord
+    chrs[0:num_chords, 0] = np.delete(r.ravel(), idx)
+
+    # Orientation of the normal at p wrt the chord
+    ori_p = np.sum(m * n_p, axis=2) / (np.linalg.norm(m, axis=2) * np.linalg.norm(n_p, axis=2))
+    ori_p = np.delete(ori_p.ravel(), idx)
+    chrs[0:num_chords, 1] = ori_p
+
+    # Orientation of the normal at q wrt the chord
+    ori_q = np.sum(- m * n_q, axis=2) / (np.linalg.norm(m, axis=2) * np.linalg.norm(n_q, axis=2))
+    ori_q = np.delete(ori_q.ravel(), idx)
+    chrs[0:num_chords, 2] = ori_q
+
+    # Angle between the two planes formed by the normal and the plane
+    plane_p = np.cross(n_p, m)
+    plane_q = np.cross(n_q, m)
+    plane_angle = np.sum(plane_p * plane_q, axis=2) / (
+    np.linalg.norm(plane_p, axis=2) * np.linalg.norm(plane_q, axis=2))
     plane_angle = np.delete(plane_angle.ravel(), idx)
     chrs[0:num_chords, 3] = plane_angle
 
     return chrs
 
-METHODS = {2: get_chords2, 3: get_chords3}
+
+METHODS = {1: {'name': '6_angles', 'num_features': 7, 'function': get_chords1},
+           2: {'name': '2_angles', 'num_features': 3, 'function': get_chords2},
+           3: {'name': 'angle_bt_planes', 'num_features': 4, 'function': get_chords3}}
 
 
-def create_chordiogram_h5(file_num, batch_size, classes, paths, output_path, num_samples=100, chord_type=1):
-
-    output_filename = os.path.join(output_path, 'modelnet40_chords_method{}_num_samples{}_train{}.h5'.format(chord_type, num_samples, file_num))
-    data = np.zeros((batch_size, num_samples*(num_samples - 1), 3))
-    print(data.shape)
+def create_chordiogram_h5(file_num, batch_size, classes, paths, output_path, num_samples=100, chord_type=1, mode='train'):
+    output_filename = os.path.join(output_path,
+                                   'modelnet40_chords_{}_num_samples{}_{}{}.h5'.format(METHODS[chord_type]['name'],
+                                                                                          num_samples, mode, file_num))
+    data = np.zeros((batch_size, num_samples * (num_samples - 1), METHODS[chord_type]['num_features']))
     labels = np.zeros((batch_size, 1), dtype=int)
 
     for i, f in enumerate(paths):
@@ -150,7 +167,7 @@ def create_chordiogram_h5(file_num, batch_size, classes, paths, output_path, num
         mesh.vertices -= mesh.centroid
         mesh.vertices /= np.linalg.norm(mesh.vertices, axis=1).max()
 
-        chr = METHODS[chord_type](mesh, num_samples=num_samples)
+        chr = METHODS[chord_type]['function'](mesh, num_samples=num_samples)
         data[i, :, :] = chr
 
         path = os.path.normpath(f)
@@ -178,10 +195,12 @@ if __name__ == '__main__':
 
     parser.add_argument('-d', '--input', help='Input Modelnet folder', dest='input_dataset', default='.')
     parser.add_argument('-b', '--batch_size', help="Batch size for each h5 file", dest="batch_size", type=int)
-    parser.add_argument('-m', '--method', help="Method to sample the point cloud", dest="sampling_method", choices=['random'], default='random')
+    parser.add_argument('-m', '--method', help="Method to sample the point cloud", dest="sampling_method",
+                        choices=['random'], default='random')
     parser.add_argument('-o', '--output', help="Output folder", dest='output_dataset')
     parser.add_argument('-t', '--mode', help="Training or testing mode", dest='mode', default='train')
-    parser.add_argument('-c', '--chord_type', help="Chord feature type", dest='chord_type', default=1)
+    parser.add_argument('-c', '--chord_type', help="Chord feature type", dest='chord_type', default=1, type=int)
+    parser.add_argument('-n', '--num_samples', help="num of random samples", dest='num_samples', default=100)
     args = parser.parse_args()
 
     if not os.path.exists(args.output_dataset):
@@ -189,23 +208,24 @@ if __name__ == '__main__':
 
     all_train_paths = np.array(glob.glob(os.path.join(args.input_dataset, '*/train/*.off')))
     all_test_paths = np.array(glob.glob(os.path.join(args.input_dataset, '*/test/*.off')))
-    all_paths = {'train': np.random.shuffle(all_train_paths),
-                 'test': np.random.shuffle(all_test_paths)}
+
+    all_paths = all_train_paths if args.mode == 'train' else all_test_paths
 
     # generate de classes label
     i = 0
     classes = {}
-    for f in all_train_paths:
+    for f in all_paths:
         path = os.path.normpath(f)
         s = path.split(os.sep)[-3]
         if s not in classes:
             classes[s] = i
             i += 1
 
-    num_h5 = int(np.ceil(len(all_train_paths) / args.batch_size))
+    num_h5 = int(np.ceil(len(all_paths) / args.batch_size))
     d = args.batch_size
-    #Parallel(n_jobs=-1, timeout=600)(delayed(create_chordiogram_h5)(i, d, all_train_paths[i * d:(i + 1) * d], args.output_dataset, args.chord_type) for i in range(num_h5))
+    #Parallel(n_jobs=-1, timeout=600)(
+    #    delayed(create_chordiogram_h5)(i, d, classes, all_paths[i * d:(i + 1) * d], args.output_dataset, args.num_samples, args.chord_type, args.mode)
+    #    for i in range(num_h5))
 
     for i in range(num_h5):
-        create_chordiogram_h5(i, d, classes, all_train_paths[i * d:(i + 1) * d], args.output_dataset, args.chord_type)
-
+        create_chordiogram_h5(i, d, classes, all_paths[i * d:(i + 1) * d], args.output_dataset, args.num_samples, args.chord_type, args.mode)
