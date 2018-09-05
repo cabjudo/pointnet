@@ -59,10 +59,14 @@ BN_DECAY_CLIP = 0.99
 HOSTNAME = socket.gethostname()
 
 # ModelNet40 official train/test split
+# TRAIN_FILES = provider.getDataFiles( \
+#     os.path.join(BASE_DIR, 'data/modelnet40_ply_hdf5_2048/train_files.txt'))
+# TEST_FILES = provider.getDataFiles(\
+#     os.path.join(BASE_DIR, 'data/modelnet40_ply_hdf5_2048/test_files_2_angles.txt'))
 TRAIN_FILES = provider.getDataFiles( \
-    os.path.join(BASE_DIR, 'data/modelnet40_ply_hdf5_2048/train_files.txt'))
+    os.path.join(BASE_DIR, 'data/chords_dataset/train_files_2_angles.txt'))
 TEST_FILES = provider.getDataFiles(\
-    os.path.join(BASE_DIR, 'data/modelnet40_ply_hdf5_2048/test_files.txt'))
+    os.path.join(BASE_DIR, 'data/chords_dataset/test_files_2_angles.txt'))
 
 def log_string(out_str):
     LOG_FOUT.write(out_str+'\n')
@@ -123,6 +127,7 @@ def train():
             
             # Add ops to save and restore all the variables.
             saver = tf.train.Saver()
+
             
         # Create a session
         config = tf.ConfigProto()
@@ -130,6 +135,11 @@ def train():
         config.allow_soft_placement = True
         config.log_device_placement = False
         sess = tf.Session(config=config)
+
+        # if a checkpoint exists, restore from the latest checkpoint
+        ckpt = tf.train.get_checkpoint_state(LOG_DIR)
+        if ckpt and ckpt.model_checkpoint_path:
+            saver.restore(sess, ckpt.model_checkpoint_path)
 
         # Add summary writers
         #merged = tf.merge_all_summaries()

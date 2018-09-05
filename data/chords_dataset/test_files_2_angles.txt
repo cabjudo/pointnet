@@ -1,0 +1,2 @@
+/Users/dipaco/Trash/chord_point_net/modelnet40_chords_2_angles_num_samples100_test0.h5
+/Users/dipaco/Trash/chord_point_net/modelnet40_chords_2_angles_num_samples100_test1.h5
