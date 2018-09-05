@@ -58,15 +58,15 @@ BN_DECAY_CLIP = 0.99
 
 HOSTNAME = socket.gethostname()
 
-# ModelNet40 official train/test split
-# TRAIN_FILES = provider.getDataFiles( \
-#     os.path.join(BASE_DIR, 'data/modelnet40_ply_hdf5_2048/train_files.txt'))
-# TEST_FILES = provider.getDataFiles(\
-#     os.path.join(BASE_DIR, 'data/modelnet40_ply_hdf5_2048/test_files_2_angles.txt'))
+#ModelNet40 official train/test split
+#TRAIN_FILES = provider.getDataFiles( \
+#    os.path.join(BASE_DIR, 'data/modelnet40_ply_hdf5_2048/train_files.txt'))
+#TEST_FILES = provider.getDataFiles(\
+#    os.path.join(BASE_DIR, 'data/modelnet40_ply_hdf5_2048/test_files.txt'))
 TRAIN_FILES = provider.getDataFiles( \
-    os.path.join(BASE_DIR, 'data/chords_dataset/train_files_2_angles.txt'))
+    os.path.join(BASE_DIR, '../../data/chords_dataset/train_files_2_angles.txt'))
 TEST_FILES = provider.getDataFiles(\
-    os.path.join(BASE_DIR, 'data/chords_dataset/test_files_2_angles.txt'))
+    os.path.join(BASE_DIR, '../../data/chords_dataset/test_files_2_angles.txt'))
 
 def log_string(out_str):
     LOG_FOUT.write(out_str+'\n')
@@ -127,7 +127,6 @@ def train():
             
             # Add ops to save and restore all the variables.
             saver = tf.train.Saver()
-
             
         # Create a session
         config = tf.ConfigProto()
@@ -205,8 +204,9 @@ def train_one_epoch(sess, ops, train_writer):
             end_idx = (batch_idx+1) * BATCH_SIZE
             
             # Augment batched point clouds by rotation and jittering
-            rotated_data = provider.rotate_point_cloud(current_data[start_idx:end_idx, :, :])
-            jittered_data = provider.jitter_point_cloud(rotated_data)
+            #rotated_data = provider.rotate_point_cloud(current_data[start_idx:end_idx, :, :])
+            #jittered_data = provider.jitter_point_cloud(rotated_data)
+            jittered_data = current_data[start_idx:end_idx, :, :]
             feed_dict = {ops['pointclouds_pl']: jittered_data,
                          ops['labels_pl']: current_label[start_idx:end_idx],
                          ops['is_training_pl']: is_training,}
