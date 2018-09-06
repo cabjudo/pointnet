@@ -138,7 +138,7 @@ def train():
         # if a checkpoint exists, restore from the latest checkpoint
         #ckpt = tf.train.get_checkpoint_state(LOG_DIR)
         #if ckpt and ckpt.model_checkpoint_path:
-        saver.restore(sess, os.path.join(LOG_DIR, "model.ckpt"))
+        #saver.restore(sess, os.path.join(LOG_DIR, "model.ckpt"))
 
         # Add summary writers
         #merged = tf.merge_all_summaries()
