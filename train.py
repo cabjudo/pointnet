@@ -136,9 +136,9 @@ def train():
         sess = tf.Session(config=config)
 
         # if a checkpoint exists, restore from the latest checkpoint
-        ckpt = tf.train.get_checkpoint_state(LOG_DIR)
-        if ckpt and ckpt.model_checkpoint_path:
-            saver.restore(sess, ckpt.model_checkpoint_path)
+        #ckpt = tf.train.get_checkpoint_state(LOG_DIR)
+        #if ckpt and ckpt.model_checkpoint_path:
+        saver.restore(sess, os.path.join(LOG_DIR, "model.ckpt"))
 
         # Add summary writers
         #merged = tf.merge_all_summaries()
@@ -148,32 +148,47 @@ def train():
         test_writer = tf.summary.FileWriter(os.path.join(LOG_DIR, 'test'))
 
         # Init variables
-        init = tf.global_variables_initializer()
+        #init = tf.global_variables_initializer()
         # To fix the bug introduced in TF 0.12.1 as in
         # http://stackoverflow.com/questions/41543774/invalidargumenterror-for-tensor-bool-tensorflow-0-12-1
         #sess.run(init)
-        sess.run(init, {is_training_pl: True})
+        #sess.run(init, {is_training_pl: True})
 
-        ops = {'pointclouds_pl': pointclouds_pl,
-               'labels_pl': labels_pl,
-               'is_training_pl': is_training_pl,
-               'pred': pred,
-               'loss': loss,
-               'train_op': train_op,
-               'merged': merged,
-               'step': batch}
+        with tf.train.MonitoredTrainingSession(
+            master='',
+            is_chief=True,
+            checkpoint_dir=LOG_DIR,
+            scaffold=None,
+            hooks=None,
+            chief_only_hooks=None,
+            save_checkpoint_secs=1200,
+            config=None,
+            stop_grace_period_secs=120,
+            log_step_count_steps=100,
+            max_wait_secs=7200,
+            summary_dir=LOG_DIR
+        ) as m_sess:
 
-        for epoch in range(MAX_EPOCH):
-            log_string('**** EPOCH %03d ****' % (epoch))
-            sys.stdout.flush()
-             
-            train_one_epoch(sess, ops, train_writer)
-            eval_one_epoch(sess, ops, test_writer)
-            
-            # Save the variables to disk.
-            if epoch % 10 == 0:
-                save_path = saver.save(sess, os.path.join(LOG_DIR, "model.ckpt"))
-                log_string("Model saved in file: %s" % save_path)
+            ops = {'pointclouds_pl': pointclouds_pl,
+                   'labels_pl': labels_pl,
+                   'is_training_pl': is_training_pl,
+                   'pred': pred,
+                   'loss': loss,
+                   'train_op': train_op,
+                   'merged': merged,
+                   'step': batch}
+
+            for epoch in range(MAX_EPOCH):
+                log_string('**** EPOCH %03d ****' % (epoch))
+                sys.stdout.flush()
+
+                train_one_epoch(sess, ops, train_writer)
+                eval_one_epoch(sess, ops, test_writer)
+
+                # Save the variables to disk.
+                #if epoch % 10 == 0:
+                #    save_path = saver.save(sess, os.path.join(LOG_DIR, "model.ckpt"))
+                #    log_string("Model saved in file: %s" % save_path)
 
 
 
