@@ -163,11 +163,14 @@ def train():
 
         print('----- \n\n\n\n\n\n\n\n {} {} \n\n\n\n\n\n\n\n\n'.format(sess.run(epoch_counter), sess.run(batch)))
         for epoch in range(sess.run(epoch_counter), MAX_EPOCH):
+
             log_string('**** EPOCH %03d ****' % (epoch))
             sys.stdout.flush()
              
             train_one_epoch(sess, ops, train_writer)
             eval_one_epoch(sess, ops, test_writer)
+
+            epoch_counter += 1
             
             # Save the variables to disk.
             if epoch % 10 == 0:
