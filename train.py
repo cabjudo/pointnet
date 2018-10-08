@@ -104,6 +104,8 @@ def train():
             # Note the global_step=batch parameter to minimize. 
             # That tells the optimizer to helpfully increment the 'batch' parameter for you every time it trains.
             batch = tf.Variable(0)
+            epoch_counter = tf.Variable(0)
+            inc = tf.assign_add(epoch_counter, 1, name='increment')
             bn_decay = get_bn_decay(batch)
             tf.summary.scalar('bn_decay', bn_decay)
 
@@ -181,6 +183,8 @@ def train():
 
             train_one_epoch(sess, ops, train_writer)
             eval_one_epoch(sess, ops, test_writer)
+
+            sess.run(inc)
 
             # Save the variables to disk.
             if epoch % 10 == 0:
