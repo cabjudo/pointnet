@@ -161,7 +161,7 @@ def train():
                'merged': merged,
                'step': batch}
 
-        print('----- \n\n\n\n\n\n\n\n {} \n\n\n\n\n\n\n\n\n'.format(sess.run(epoch_counter)))
+        print('----- \n\n\n\n\n\n\n\n {} {} \n\n\n\n\n\n\n\n\n'.format(sess.run(epoch_counter), sess.run(batch)))
         for epoch in range(sess.run(epoch_counter), MAX_EPOCH):
             log_string('**** EPOCH %03d ****' % (epoch))
             sys.stdout.flush()
