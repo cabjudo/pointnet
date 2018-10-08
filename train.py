@@ -100,6 +100,7 @@ def train():
             # Note the global_step=batch parameter to minimize. 
             # That tells the optimizer to helpfully increment the 'batch' parameter for you every time it trains.
             batch = tf.Variable(0)
+            epoch_counter = tf.Variable(0)
             bn_decay = get_bn_decay(batch)
             tf.summary.scalar('bn_decay', bn_decay)
 
@@ -138,12 +139,17 @@ def train():
                                   sess.graph)
         test_writer = tf.summary.FileWriter(os.path.join(LOG_DIR, 'test'))
 
-        # Init variables
-        init = tf.global_variables_initializer()
-        # To fix the bug introduced in TF 0.12.1 as in
-        # http://stackoverflow.com/questions/41543774/invalidargumenterror-for-tensor-bool-tensorflow-0-12-1
-        #sess.run(init)
-        sess.run(init, {is_training_pl: True})
+        # if a checkpoint exists, restore from the latest checkpoint
+        ckpt = tf.train.get_checkpoint_state(LOG_DIR)
+        if ckpt and ckpt.model_checkpoint_path:
+            saver.restore(sess, ckpt.model_checkpoint_path)
+        else:
+            # Init variables
+            init = tf.global_variables_initializer()
+            # To fix the bug introduced in TF 0.12.1 as in
+            # http://stackoverflow.com/questions/41543774/invalidargumenterror-for-tensor-bool-tensorflow-0-12-1
+            #sess.run(init)
+            sess.run(init, {is_training_pl: True})
 
         ops = {'pointclouds_pl': pointclouds_pl,
                'labels_pl': labels_pl,
@@ -154,7 +160,8 @@ def train():
                'merged': merged,
                'step': batch}
 
-        for epoch in range(MAX_EPOCH):
+        print('----- \n\n\n\n\n\n\n\n {} \n\n\n\n\n\n\n\n\n'.format(sess.run(epoch_counter)))
+        for epoch in range(sess.run(epoch_counter), MAX_EPOCH):
             log_string('**** EPOCH %03d ****' % (epoch))
             sys.stdout.flush()
              
