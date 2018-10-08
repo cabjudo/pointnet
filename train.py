@@ -142,6 +142,7 @@ def train():
         # if a checkpoint exists, restore from the latest checkpoint
         ckpt = tf.train.get_checkpoint_state(LOG_DIR)
         if ckpt and ckpt.model_checkpoint_path:
+            print('----- \n\n\n\n\n\n\n\n  could restore {} \n\n\n\n\n\n\n\n\n'.format(sess.run(epoch_counter)))
             saver.restore(sess, ckpt.model_checkpoint_path)
         else:
             # Init variables
