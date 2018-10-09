@@ -177,6 +177,8 @@ def train():
                'merged': merged,
                'step': batch}
 
+        assert sess.run(epoch_counter) <= 250, 'Training is complete.'
+
         for epoch in range(sess.run(epoch_counter), MAX_EPOCH):
             log_string('**** EPOCH %03d ****' % (epoch))
             sys.stdout.flush()
