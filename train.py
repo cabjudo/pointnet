@@ -285,6 +285,7 @@ def eval_one_epoch(sess, ops, test_writer, eval_accuracy):
     log_string('eval avg class acc: %f' % (np.mean(np.array(total_correct_class)/np.array(total_seen_class,dtype=np.float))))
 
     eval_accuracy.assign(total_correct / float(total_seen))
+    sess.run(eval_accuracy)
          
 
 
