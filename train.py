@@ -177,7 +177,7 @@ def train():
                'merged': merged,
                'step': batch}
 
-        for epoch in range(MAX_EPOCH):
+        for epoch in range(sess.run(epoch_counter), MAX_EPOCH):
             log_string('**** EPOCH %03d ****' % (epoch))
             sys.stdout.flush()
 
