@@ -109,7 +109,6 @@ def train():
             inc = tf.assign_add(epoch_counter, 1, name='increment')
             bn_decay = get_bn_decay(batch)
             tf.summary.scalar('bn_decay', bn_decay)
-            tf.summary.scalar('eval_accuracy', eval_accuracy)
 
             # Get model and loss 
             pred, end_points = MODEL.get_model(pointclouds_pl, is_training_pl, bn_decay=bn_decay)
@@ -186,7 +185,7 @@ def train():
             sys.stdout.flush()
 
             train_one_epoch(sess, ops, train_writer)
-            eval_one_epoch(sess, ops, test_writer, eval_accuracy)
+            eval_one_epoch(sess, ops, test_writer)
 
             sess.run(inc)
 
@@ -243,7 +242,7 @@ def train_one_epoch(sess, ops, train_writer):
         log_string('accuracy: %f' % (total_correct / float(total_seen)))
 
         
-def eval_one_epoch(sess, ops, test_writer, eval_accuracy):
+def eval_one_epoch(sess, ops, test_writer):
     """ ops: dict mapping from string to tf ops """
     is_training = False
     total_correct = 0
@@ -287,9 +286,6 @@ def eval_one_epoch(sess, ops, test_writer, eval_accuracy):
     log_string('eval mean loss: %f' % (loss_sum / float(total_seen)))
     log_string('eval accuracy: %f'% (total_correct / float(total_seen)))
     log_string('eval avg class acc: %f' % (np.mean(np.array(total_correct_class)/np.array(total_seen_class,dtype=np.float))))
-
-    eval_accuracy.assign(total_correct / float(total_seen))
-    sess.run(eval_accuracy)
          
 
 
