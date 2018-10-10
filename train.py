@@ -279,8 +279,10 @@ def eval_one_epoch(sess, ops, test_writer, eval_accuracy):
                 l = current_label[i]
                 total_seen_class[l] += 1
                 total_correct_class[l] += (pred_val[i-start_idx] == l)
-        
-        tf.summary.scalar('eval_accuracy', total_correct)
+
+            with tf.Graph().as_default():
+                with tf.device('/gpu:' + str(GPU_INDEX)):
+                    tf.summary.scalar('eval_accuracy', total_correct)
             
     log_string('eval mean loss: %f' % (loss_sum / float(total_seen)))
     log_string('eval accuracy: %f'% (total_correct / float(total_seen)))
