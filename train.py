@@ -223,9 +223,9 @@ def train_one_epoch(sess, ops, train_writer):
             end_idx = (batch_idx+1) * BATCH_SIZE
             
             # Augment batched point clouds by rotation and jittering
-            #rotated_data = provider.rotate_point_cloud(current_data[start_idx:end_idx, :, :])
-            #jittered_data = provider.jitter_point_cloud(rotated_data)
-            jittered_data = current_data[start_idx:end_idx, :, :]
+            rotated_data = provider.rotate_point_cloud(current_data[start_idx:end_idx, :, :])
+            jittered_data = provider.jitter_point_cloud(rotated_data)
+            #jittered_data = current_data[start_idx:end_idx, :, :]
             feed_dict = {ops['pointclouds_pl']: jittered_data,
                          ops['labels_pl']: current_label[start_idx:end_idx],
                          ops['is_training_pl']: is_training,}
