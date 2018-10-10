@@ -198,7 +198,6 @@ if __name__ == '__main__':
     parser.add_argument('-m', '--method', help="Method to sample the point cloud", dest="sampling_method",
                         choices=['random'], default='random')
     parser.add_argument('-o', '--output', help="Output folder", dest='output_dataset')
-    parser.add_argument('-t', '--mode', help="Training or testing mode", dest='mode', default='train')
     parser.add_argument('-c', '--chord_type', help="Chord feature type", dest='chord_type', default=1, type=int)
     parser.add_argument('-n', '--num_samples', help="num of random samples", dest='num_samples', default=100)
     args = parser.parse_args()
@@ -208,24 +207,33 @@ if __name__ == '__main__':
 
     all_train_paths = np.array(glob.glob(os.path.join(args.input_dataset, '*/train/*.off')))
     all_test_paths = np.array(glob.glob(os.path.join(args.input_dataset, '*/test/*.off')))
+    np.random.shuffle(all_train_paths)
+    np.random.shuffle(all_test_paths)
 
-    all_paths = all_train_paths if args.mode == 'train' else all_test_paths
+    #all_paths = all_train_paths if args.mode == 'train' else all_test_paths
 
     # generate de classes label
     i = 0
     classes = {}
-    for f in all_paths:
+    for f in all_test_paths:
         path = os.path.normpath(f)
         s = path.split(os.sep)[-3]
         if s not in classes:
             classes[s] = i
             i += 1
 
-    num_h5 = int(np.ceil(len(all_paths) / args.batch_size))
+    num_h5_train = int(np.ceil(len(all_train_paths) / args.batch_size))
     d = args.batch_size
     Parallel(n_jobs=-1, timeout=600)(
-        delayed(create_chordiogram_h5)(i, d, classes, all_paths[i * d:(i + 1) * d], args.output_dataset, args.num_samples, args.chord_type, args.mode)
-        for i in range(num_h5))
+        delayed(create_chordiogram_h5)(i, d, classes, all_train_paths[i * d:(i + 1) * d], args.output_dataset, args.num_samples, args.chord_type, 'train')
+        for i in range(num_h5_train))
+
+    num_h5_test = int(np.ceil(len(all_test_paths) / args.batch_size))
+    d = args.batch_size
+    Parallel(n_jobs=-1, timeout=600)(
+        delayed(create_chordiogram_h5)(i, d, classes, all_test_paths[i * d:(i + 1) * d], args.output_dataset,
+                                       args.num_samples, args.chord_type, 'test')
+        for i in range(num_h5_test))
 
     #for i in range(num_h5):
     #    create_chordiogram_h5(i, d, classes, all_paths[i * d:(i + 1) * d], args.output_dataset, args.num_samples, args.chord_type, args.mode)
