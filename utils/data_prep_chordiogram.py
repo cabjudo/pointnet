@@ -215,7 +215,7 @@ if __name__ == '__main__':
     # generate de classes label
     i = 0
     classes = {}
-    for f in all_test_paths:
+    for f in all_train_paths:
         path = os.path.normpath(f)
         s = path.split(os.sep)[-3]
         if s not in classes:
