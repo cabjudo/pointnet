@@ -14,7 +14,7 @@ sys.path.append(os.path.join(BASE_DIR, 'utils'))
 import provider
 import tf_util
 
-model_choices = [pointnet_cls, pointnet_cls_basic, pointnet_no3trans, pointnet_notrans]
+model_choices = ["pointnet_cls", "pointnet_cls_basic", "pointnet_no3trans", "pointnet_notrans"]
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--gpu', type=int, default=0, help='GPU to use [default: GPU 0]')
