@@ -28,7 +28,7 @@ for data in data_choices:
           'kcreator',
           '-g','1' ,
           '--job-name', '{}'.format(name),
-          '-i', 'chaneyk/tensorflow:a4f7556-py3',
+          '-i', 'chaneyk/tensorflow:v1.10.0-py3',
           '-w', '/NAS/home/pointnet',
           '-Ti','-X',
           '-nc','1',
