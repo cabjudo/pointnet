@@ -16,7 +16,7 @@ import tf_util
 
 model_choices = ["pointnet_cls", "pointnet_cls_basic", "pointnet_no3trans", "pointnet_notrans"]
 dataset_choices = [ "random", "area_weighted" ]
-    
+
 parser = argparse.ArgumentParser()
 parser.add_argument('--gpu', type=int, default=0, help='GPU to use [default: GPU 0]')
 parser.add_argument('--model', default='pointnet_cls', choices=model_choices, help='Model name: pointnet_cls or pointnet_cls_basic [default: pointnet_cls]')
@@ -63,17 +63,26 @@ BN_DECAY_CLIP = 0.99
 HOSTNAME = socket.gethostname()
 
 #ModelNet40 official train/test split
-DatasetPath = { "random": { "train": os.path.join(BASE_DIR, '../../data/chords_dataset/train_files_2_angles.txt'), "test": os.path.join(BASE_DIR, '../../data/chords_dataset/test_files_2_angles.txt') }, "area_weighted": { "train": 'path/to/train/dataset', "test": 'path/to/test/dataset'} }
+DatasetPath = {
+    "random": {
+        "train": os.path.join(BASE_DIR, '../../data/chords_dataset/random_uniform/train_files_2_angles.txt'),
+        "test": os.path.join(BASE_DIR, '../../data/chords_dataset/random_uniform/test_files_2_angles.txt')
+    },
+    "area_weighted": {
+        "train": os.path.join(BASE_DIR, '../../data/chords_dataset/area_weighted/train_files_2_angles.txt'),
+        "test": os.path.join(BASE_DIR, '../../data/chords_dataset/area_weighted/train_files_2_angles.txt'),
+    }
+}
 
 datasetpath = DatasetPath[FLAGS.dataset]
 #TRAIN_FILES = provider.getDataFiles( \
 #    os.path.join(BASE_DIR, 'data/modelnet40_ply_hdf5_2048/train_files.txt'))
 #TEST_FILES = provider.getDataFiles(\
 #    os.path.join(BASE_DIR, 'data/modelnet40_ply_hdf5_2048/test_files.txt'))
-TRAIN_FILES = provider.getDataFiles( datasetpath[train] )
+TRAIN_FILES = provider.getDataFiles(datasetpath['train'])
     # os.path.join(BASE_DIR, '../../data/chords_dataset/train_files_2_angles.txt'))
-     
-TEST_FILES = provider.getDataFiles( datasetpath[test] )
+
+TEST_FILES = provider.getDataFiles(datasetpath['test'])
     # os.path.join(BASE_DIR, '../../data/chords_dataset/test_files_2_angles.txt'))
 
 def log_string(out_str):
@@ -90,7 +99,7 @@ def get_learning_rate(batch):
                         DECAY_RATE,          # Decay rate.
                         staircase=True)
     learning_rate = tf.maximum(learning_rate, 0.00001) # CLIP THE LEARNING RATE!
-    return learning_rate        
+    return learning_rate
 
 def get_bn_decay(batch):
     bn_momentum = tf.train.exponential_decay(
@@ -108,7 +117,7 @@ def train():
             pointclouds_pl, labels_pl = MODEL.placeholder_inputs(BATCH_SIZE, NUM_POINT)
             is_training_pl = tf.placeholder(tf.bool, shape=())
             print(is_training_pl)
-            
+
             # Note the global_step=batch parameter to minimize. 
             # That tells the optimizer to helpfully increment the 'batch' parameter for you every time it trains.
             batch = tf.Variable(0)
@@ -135,10 +144,10 @@ def train():
             elif OPTIMIZER == 'adam':
                 optimizer = tf.train.AdamOptimizer(learning_rate)
             train_op = optimizer.minimize(loss, global_step=batch)
-            
+
             # Add ops to save and restore all the variables.
             saver = tf.train.Saver()
-            
+
         # Create a session
         config = tf.ConfigProto()
         config.gpu_options.allow_growth = True
@@ -207,29 +216,29 @@ def train():
 def train_one_epoch(sess, ops, train_writer):
     """ ops: dict mapping from string to tf ops """
     is_training = True
-    
+
     # Shuffle train files
     train_file_idxs = np.arange(0, len(TRAIN_FILES))
     np.random.shuffle(train_file_idxs)
-    
+
     for fn in range(len(TRAIN_FILES)):
         log_string('----' + str(fn) + '-----')
         current_data, current_label = provider.loadDataFile(TRAIN_FILES[train_file_idxs[fn]])
         current_data = current_data[:,0:NUM_POINT,:]
-        current_data, current_label, _ = provider.shuffle_data(current_data, np.squeeze(current_label))            
+        current_data, current_label, _ = provider.shuffle_data(current_data, np.squeeze(current_label))
         current_label = np.squeeze(current_label)
-        
+
         file_size = current_data.shape[0]
         num_batches = file_size // BATCH_SIZE
-        
+
         total_correct = 0
         total_seen = 0
         loss_sum = 0
-       
+
         for batch_idx in range(num_batches):
             start_idx = batch_idx * BATCH_SIZE
             end_idx = (batch_idx+1) * BATCH_SIZE
-            
+
             # Augment batched point clouds by rotation and jittering
             rotated_data = provider.rotate_point_cloud(current_data[start_idx:end_idx, :, :])
             jittered_data = provider.jitter_point_cloud(rotated_data)
@@ -245,11 +254,11 @@ def train_one_epoch(sess, ops, train_writer):
             total_correct += correct
             total_seen += BATCH_SIZE
             loss_sum += loss_val
-        
+
         log_string('mean loss: %f' % (loss_sum / float(num_batches)))
         log_string('accuracy: %f' % (total_correct / float(total_seen)))
 
-        
+
 def eval_one_epoch(sess, ops, test_writer):
     """ ops: dict mapping from string to tf ops """
     is_training = False
@@ -258,16 +267,16 @@ def eval_one_epoch(sess, ops, test_writer):
     loss_sum = 0
     total_seen_class = [0 for _ in range(NUM_CLASSES)]
     total_correct_class = [0 for _ in range(NUM_CLASSES)]
-    
+
     for fn in range(len(TEST_FILES)):
         log_string('----' + str(fn) + '-----')
         current_data, current_label = provider.loadDataFile(TEST_FILES[fn])
         current_data = current_data[:,0:NUM_POINT,:]
         current_label = np.squeeze(current_label)
-        
+
         file_size = current_data.shape[0]
         num_batches = file_size // BATCH_SIZE
-        
+
         for batch_idx in range(num_batches):
             start_idx = batch_idx * BATCH_SIZE
             end_idx = (batch_idx+1) * BATCH_SIZE
@@ -290,11 +299,11 @@ def eval_one_epoch(sess, ops, test_writer):
             with tf.Graph().as_default():
                 with tf.device('/gpu:' + str(GPU_INDEX)):
                     tf.summary.scalar('eval_accuracy', total_correct)
-            
+
     log_string('eval mean loss: %f' % (loss_sum / float(total_seen)))
     log_string('eval accuracy: %f'% (total_correct / float(total_seen)))
     log_string('eval avg class acc: %f' % (np.mean(np.array(total_correct_class)/np.array(total_seen_class,dtype=np.float))))
-         
+
 
 
 if __name__ == "__main__":
