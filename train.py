@@ -65,16 +65,16 @@ HOSTNAME = socket.gethostname()
 #ModelNet40 official train/test split
 DatasetPath = {
     "plane0": {
-        "train": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane0/train_files_2_angles.txt'),
-        "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane0/test_files_2_angles.txt')
+        "train": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane0/train_files.txt'),
+        "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane0/test_files.txt')
     },
     "plane1": {
-        "train": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane1/train_files_2_angles.txt'),
-        "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane1/train_files_2_angles.txt'),
+        "train": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane1/train_files.txt'),
+        "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane1/train_files.txt'),
     },
     "plane2": {
-        "train": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane2/train_files_2_angles.txt'),
-        "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane2/train_files_2_angles.txt'),
+        "train": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane2/train_files.txt'),
+        "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane2/train_files.txt'),
     }
 }
 
@@ -199,7 +199,7 @@ def train():
                'merged': merged,
                'step': batch}
 
-        assert sess.run(epoch_counter) <= 250, 'Training is complete.'
+        assert sess.run(epoch_counter) < 250, 'Training is complete.'
 
         for epoch in range(sess.run(epoch_counter), MAX_EPOCH):
             log_string('**** EPOCH %03d ****' % (epoch))
