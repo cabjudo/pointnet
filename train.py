@@ -15,15 +15,15 @@ import provider
 import tf_util
 
 model_choices = ["pointnet_cls", "pointnet_cls_basic", "pointnet_no3trans", "pointnet_notrans"]
-dataset_choices = [ "random", "area_weighted" ]
+dataset_choices = ["type_1", "type_2", "type_3"]
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--gpu', type=int, default=0, help='GPU to use [default: GPU 0]')
 parser.add_argument('--model', default='pointnet_cls', choices=model_choices, help='Model name: pointnet_cls or pointnet_cls_basic [default: pointnet_cls]')
-parser.add_argument('--dataset', default='random', choices=dataset_choices, help='Dataset: random or area weighted [default: random]')
+parser.add_argument('--dataset', default='type_2', choices=dataset_choices, help='Dataset: chordiogram representation [default: type_1]')
 parser.add_argument('--log_dir', default='log', help='Log dir [default: log]')
 parser.add_argument('--num_point', type=int, default=1024, help='Point Number [256/512/1024/2048] [default: 1024]')
-parser.add_argument('--max_epoch', type=int, default=300, help='Epoch to run [default: 250]')
+parser.add_argument('--max_epoch', type=int, default=250, help='Epoch to run [default: 250]')
 parser.add_argument('--batch_size', type=int, default=32, help='Batch Size during training [default: 32]')
 parser.add_argument('--learning_rate', type=float, default=0.001, help='Initial learning rate [default: 0.001]')
 parser.add_argument('--momentum', type=float, default=0.9, help='Initial learning rate [default: 0.9]')
@@ -240,8 +240,8 @@ def train_one_epoch(sess, ops, train_writer):
             end_idx = (batch_idx+1) * BATCH_SIZE
 
             # Augment batched point clouds by rotation and jittering
-            rotated_data = provider.rotate_point_cloud(current_data[start_idx:end_idx, :, :])
-            jittered_data = provider.jitter_point_cloud(rotated_data)
+            #rotated_data = provider.rotate_point_cloud(current_data[start_idx:end_idx, :, :])
+            jittered_data = provider.jitter_point_cloud(current_data[start_idx:end_idx, :, :])
             #jittered_data = current_data[start_idx:end_idx, :, :]
             feed_dict = {ops['pointclouds_pl']: jittered_data,
                          ops['labels_pl']: current_label[start_idx:end_idx],
