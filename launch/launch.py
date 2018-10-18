@@ -12,7 +12,7 @@ lr_exponent = 2 + np.random.rand(samples)*3
 lr = np.power(10, -lr_exponent)
 
 model_choices = ["pointnet_cls", "pointnet_no3trans", "pointnet_notrans"]
-data_choices = ["type_1", "type_2", "type_3"]
+data_choices = ["plane0", "plane1", "plane2"]
 
 for data in data_choices:
   for arch in model_choices:
