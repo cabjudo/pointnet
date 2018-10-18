@@ -290,6 +290,7 @@ def eval_one_epoch(sess, ops, test_writer):
                          ops['is_training_pl']: is_training}
             summary, step, loss_val, pred_val = sess.run([ops['merged'], ops['step'],
                 ops['loss'], ops['pred']], feed_dict=feed_dict)
+            test_writer.add_summary(summary, step)
             pred_val = np.argmax(pred_val, 1)
             correct = np.sum(pred_val == current_label[start_idx:end_idx])
             total_correct += correct
@@ -300,9 +301,6 @@ def eval_one_epoch(sess, ops, test_writer):
                 total_seen_class[l] += 1
                 total_correct_class[l] += (pred_val[i-start_idx] == l)
 
-            with tf.Graph().as_default():
-                with tf.device('/gpu:' + str(GPU_INDEX)):
-                    tf.summary.scalar('eval_accuracy', total_correct)
 
     log_string('eval mean loss: %f' % (loss_sum / float(total_seen)))
     log_string('eval accuracy: %f'% (total_correct / float(total_seen)))
