@@ -15,12 +15,12 @@ import provider
 import tf_util
 
 model_choices = ["pointnet_cls", "pointnet_cls_basic", "pointnet_no3trans", "pointnet_notrans"]
-dataset_choices = ["type_1", "type_2", "type_3"]
+dataset_choices = ["plane0", "plane1", "plane2"]
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--gpu', type=int, default=0, help='GPU to use [default: GPU 0]')
 parser.add_argument('--model', default='pointnet_cls', choices=model_choices, help='Model name: pointnet_cls or pointnet_cls_basic [default: pointnet_cls]')
-parser.add_argument('--dataset', default='type_2', choices=dataset_choices, help='Dataset: chordiogram representation [default: type_1]')
+parser.add_argument('--dataset', default='plane1', choices=dataset_choices, help='Dataset: chordiogram representation [default: plane11]')
 parser.add_argument('--log_dir', default='log', help='Log dir [default: log]')
 parser.add_argument('--num_point', type=int, default=1024, help='Point Number [256/512/1024/2048] [default: 1024]')
 parser.add_argument('--max_epoch', type=int, default=250, help='Epoch to run [default: 250]')
@@ -64,13 +64,17 @@ HOSTNAME = socket.gethostname()
 
 #ModelNet40 official train/test split
 DatasetPath = {
-    "random": {
-        "train": os.path.join(BASE_DIR, '../../data/chords_dataset/random_uniform/train_files_2_angles.txt'),
-        "test": os.path.join(BASE_DIR, '../../data/chords_dataset/random_uniform/test_files_2_angles.txt')
+    "plane0": {
+        "train": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane0/train_files_2_angles.txt'),
+        "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane0/test_files_2_angles.txt')
     },
-    "area_weighted": {
-        "train": os.path.join(BASE_DIR, '../../data/chords_dataset/area_weighted/train_files_2_angles.txt'),
-        "test": os.path.join(BASE_DIR, '../../data/chords_dataset/area_weighted/train_files_2_angles.txt'),
+    "plane1": {
+        "train": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane1/train_files_2_angles.txt'),
+        "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane1/train_files_2_angles.txt'),
+    },
+    "plane2": {
+        "train": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane2/train_files_2_angles.txt'),
+        "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane2/train_files_2_angles.txt'),
     }
 }
 
