@@ -9,13 +9,13 @@ sys.path.append(os.path.join(BASE_DIR, '../utils'))
 import tf_util
 from transform_nets import input_transform_net, feature_transform_net
 
-def placeholder_inputs(batch_size, num_point):
-    pointclouds_pl = tf.placeholder(tf.float32, shape=(batch_size, num_point, 7))
+def placeholder_inputs(batch_size, num_point, input_dims=3):
+    pointclouds_pl = tf.placeholder(tf.float32, shape=(batch_size, num_point, input_dims))
     labels_pl = tf.placeholder(tf.int32, shape=(batch_size))
     return pointclouds_pl, labels_pl
 
 
-def get_model(point_cloud, is_training, bn_decay=None, input_dims=3):
+def get_model(point_cloud, is_training, bn_decay=None, input_dims=7):
     """ Classification PointNet, input is BxNx3, output Bx40 """
     batch_size = point_cloud.get_shape()[0].value
     num_point = point_cloud.get_shape()[1].value

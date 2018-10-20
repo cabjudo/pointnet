@@ -67,29 +67,29 @@ DatasetPath = {
     "plane0": {
         "train": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane0/train_files.txt'),
         "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane0/test_files.txt'),
-        "num_chordiogram_features": 7,
+        "num_chord_features": 7,
     },
     "plane1": {
         "train": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane1/train_files.txt'),
         "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane1/train_files.txt'),
-        "num_chordiogram_features": 3,
+        "num_chord_features": 3,
     },
     "plane2": {
         "train": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane2/train_files.txt'),
         "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane2/train_files.txt'),
-        "num_chordiogram_features": 4,
+        "num_chord_features": 4,
     }
 }
 
-DATASET_INFO = DatasetPath[FLAGS.dataset]
+DSET_INFO = DatasetPath[FLAGS.dataset]
 #TRAIN_FILES = provider.getDataFiles( \
 #    os.path.join(BASE_DIR, 'data/modelnet40_ply_hdf5_2048/train_files.txt'))
 #TEST_FILES = provider.getDataFiles(\
 #    os.path.join(BASE_DIR, 'data/modelnet40_ply_hdf5_2048/test_files.txt'))
-TRAIN_FILES = provider.getDataFiles(DATASET_INFO['train'])
+TRAIN_FILES = provider.getDataFiles(DSET_INFO['train'])
     # os.path.join(BASE_DIR, '../../data/chords_dataset/train_files_2_angles.txt'))
 
-TEST_FILES = provider.getDataFiles(DATASET_INFO['test'])
+TEST_FILES = provider.getDataFiles(DSET_INFO['test'])
     # os.path.join(BASE_DIR, '../../data/chords_dataset/test_files_2_angles.txt'))
 
 def log_string(out_str):
@@ -121,7 +121,7 @@ def get_bn_decay(batch):
 def train():
     with tf.Graph().as_default():
         with tf.device('/gpu:'+str(GPU_INDEX)):
-            pointclouds_pl, labels_pl = MODEL.placeholder_inputs(BATCH_SIZE, NUM_POINT)
+            pointclouds_pl, labels_pl = MODEL.placeholder_inputs(BATCH_SIZE, NUM_POINT, DSET_INFO['num_chord_features'])
             is_training_pl = tf.placeholder(tf.bool, shape=())
             print(is_training_pl)
 
@@ -136,7 +136,7 @@ def train():
 
             # Get model and loss 
             pred, end_points = MODEL.get_model(pointclouds_pl, is_training_pl, bn_decay=bn_decay,
-                                               input_dims=DATASET_INFO['num_chordiogram_features'])
+                                               input_dims=DSET_INFO['num_chord_features'])
             loss = MODEL.get_loss(pred, labels_pl, end_points)
             tf.summary.scalar('loss', loss)
 
