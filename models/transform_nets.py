@@ -37,7 +37,7 @@ def input_transform_net(point_cloud, is_training, bn_decay=None, K=3):
                                   scope='tfc2', bn_decay=bn_decay)
 
     with tf.variable_scope('transform_XYZ') as sc:
-        assert(K==3)
+        #assert(K==3)
         weights = tf.get_variable('weights', [256, 3*K],
                                   initializer=tf.constant_initializer(0.0),
                                   dtype=tf.float32)
