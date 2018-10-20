@@ -15,7 +15,7 @@ def input_transform_net(point_cloud, is_training, bn_decay=None, K=3):
     num_point = point_cloud.get_shape()[1].value
 
     input_image = tf.expand_dims(point_cloud, -1)
-    net = tf_util.conv2d(input_image, 64, [1,3],
+    net = tf_util.conv2d(input_image, 64, [1, K],
                          padding='VALID', stride=[1,1],
                          bn=True, is_training=is_training,
                          scope='tconv1', bn_decay=bn_decay)
@@ -49,7 +49,7 @@ def input_transform_net(point_cloud, is_training, bn_decay=None, K=3):
         transform = tf.matmul(net, weights)
         transform = tf.nn.bias_add(transform, biases)
 
-    transform = tf.reshape(transform, [batch_size, 3, K])
+    transform = tf.reshape(transform, [batch_size, K, K])
     return transform
 
 
