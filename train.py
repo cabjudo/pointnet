@@ -16,6 +16,7 @@ import tf_util
 
 model_choices = ["pointnet_cls", "pointnet_cls_basic", "pointnet_no3trans", "pointnet_notrans"]
 dataset_choices = ["plane0", "plane1", "plane2"]
+train_test = ["z-z", "z-so3", "so3-so3"]
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--gpu', type=int, default=0, help='GPU to use [default: GPU 0]')
@@ -30,6 +31,7 @@ parser.add_argument('--momentum', type=float, default=0.9, help='Initial learnin
 parser.add_argument('--optimizer', default='adam', help='adam or momentum [default: adam]')
 parser.add_argument('--decay_step', type=int, default=200000, help='Decay step for lr decay [default: 200000]')
 parser.add_argument('--decay_rate', type=float, default=0.7, help='Decay rate for lr decay [default: 0.8]')
+parser.add_argument('--train_test', type=float, default="z-z", help='Decay rate for lr decay [default: z-z]')
 FLAGS = parser.parse_args()
 
 
@@ -42,6 +44,7 @@ MOMENTUM = FLAGS.momentum
 OPTIMIZER = FLAGS.optimizer
 DECAY_STEP = FLAGS.decay_step
 DECAY_RATE = FLAGS.decay_rate
+TRAIN_TEST = FLAGS.train_test
 
 MODEL = importlib.import_module(FLAGS.model) # import network module
 MODEL_FILE = os.path.join(BASE_DIR, 'models', FLAGS.model+'.py')
@@ -248,7 +251,9 @@ def train_one_epoch(sess, ops, train_writer):
             end_idx = (batch_idx+1) * BATCH_SIZE
 
             # Augment batched point clouds by rotation and jittering
-            #rotated_data = provider.rotate_point_cloud(current_data[start_idx:end_idx, :, :])
+            # rotation depends on dataset and train/test type
+            # if TRAIN_TEST in ["z-z", "z-so3"]: train with azimuthal rotations else: train with so3
+            rotated_data = provider.rotate_point_cloud(current_data[start_idx:end_idx, :, :], 'train', TRAIN_TEST)
             jittered_data = provider.jitter_point_cloud(current_data[start_idx:end_idx, :, :])
             #jittered_data = current_data[start_idx:end_idx, :, :]
             feed_dict = {ops['pointclouds_pl']: jittered_data,
@@ -289,6 +294,10 @@ def eval_one_epoch(sess, ops, test_writer):
             start_idx = batch_idx * BATCH_SIZE
             end_idx = (batch_idx+1) * BATCH_SIZE
 
+            # Augment batched point clouds by rotation and jittering
+            # rotation depends on dataset and train/test type
+            # if TRAIN_TEST in ["so3-so3", "z-so3"]: test with arbitrary rotations else: test with z
+            rotated_data = provider.rotate_point_cloud(current_data[start_idx:end_idx, :, :], 'test', TRAIN_TEST)
             feed_dict = {ops['pointclouds_pl']: current_data[start_idx:end_idx, :, :],
                          ops['labels_pl']: current_label[start_idx:end_idx],
                          ops['is_training_pl']: is_training}

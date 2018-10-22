@@ -30,22 +30,52 @@ def shuffle_data(data, labels):
     return data[idx, ...], labels[idx], idx
 
 
-def rotate_point_cloud(batch_data):
+
+def _rot_z(theta):
+    return np.array([ [np.cos(theta), -np.sin(theta), 0],
+                      [np.sin(theta), np.cos(theta), 0],
+                      [0, 0, 1] ])
+
+
+def _rot_y(theta):
+    return np.array([ [np.cos(theta), 0, np.sin(theta)],
+                      [0, 1, 0],
+                      [-np.sin(theta), 0, np.cos(theta)] ])
+
+
+def rotate_point_cloud(batch_data, mode, rot_type):
     """ Randomly rotate the point clouds to augument the dataset
         rotation is per shape based along up direction
         Input:
           BxNx3 array, original batch of point clouds
+          mode: ['train', 'test']
+          rot_type: ['z-z', 'z-so3', 'so3-so3']
         Return:
           BxNx3 array, rotated batch of point clouds
     """
+    
+    if rot_type not None:
+        idx = 1 if mode is 'train' else 0
+        rot_type = rot_type.split('-')[idx]
+
     rotated_data = np.zeros(batch_data.shape, dtype=np.float32)
     for k in range(batch_data.shape[0]):
-        rotation_angle = np.random.uniform() * 2 * np.pi
-        cosval = np.cos(rotation_angle)
-        sinval = np.sin(rotation_angle)
-        rotation_matrix = np.array([[cosval, 0, sinval],
-                                    [0, 1, 0],
-                                    [-sinval, 0, cosval]])
+
+        if rot_type is 'z':
+            rotation_angle = np.random.uniform() * 2 * np.pi
+            rotation_matrix = _rot_z(theta)
+        elif rot_type is 'so3': # rot is 'so3'
+            alpha, beta, gamma = np.random.uniform(3) * 2 * np.pi
+            rotation_matrix = np.dot( np.dot(_rot_z(alpha), _rot_y(beta)), _rot_z(gamma))
+        else: # rot_type is None
+            rotation_matrix = np.eye(3)
+
+        # cosval = np.cos(rotation_angle)
+        # sinval = np.sin(rotation_angle)
+        # rotation_matrix = np.array([[cosval, 0, sinval],
+        #                             [0, 1, 0],
+        #                             [-sinval, 0, cosval]])
+
         shape_pc = batch_data[k, ...]
         rotated_data[k, ...] = np.dot(shape_pc.reshape((-1, 3)), rotation_matrix)
     return rotated_data
