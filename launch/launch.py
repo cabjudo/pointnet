@@ -43,7 +43,7 @@ for data in data_choices:
                     '--max_epoch=250',
                     '--momentum=0.9',
                     '--decay_step=200000',
-                    'decay_rate=0.8'
+                    '--decay_rate=0.8'
                 ]
 
                 # Create yaml file
