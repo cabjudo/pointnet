@@ -30,6 +30,7 @@ parser.add_argument('--batch_size', type=int, default=32, help='Batch Size durin
 parser.add_argument('--train_test', default="z-z", help='Decay rate for lr decay [default: z-z]')
 parser.add_argument('--model_path', default='log/model.ckpt', help='model checkpoint file path [default: log/model.ckpt]')
 parser.add_argument('--dump_dir', default='dump', help='dump folder path [dump]')
+parser.add_argument('--visu', action='store_true', help='Whether to dump image for error case [default: False]')
 FLAGS = parser.parse_args()
 
 
@@ -115,7 +116,7 @@ def evaluate(num_votes):
         is_training_pl = tf.placeholder(tf.bool, shape=())
 
         # simple model
-        pred, end_points = MODEL.get_model(pointclouds_pl, is_training_pl)
+        pred, end_points = MODEL.get_model(pointclouds_pl, is_training_pl, input_dims=DSET_INFO['num_chord_features'])
         loss = MODEL.get_loss(pred, labels_pl, end_points)
         
         # Add ops to save and restore all the variables.
@@ -171,8 +172,12 @@ def eval_one_epoch(sess, ops, num_votes=1, topk=1):
             batch_pred_sum = np.zeros((cur_batch_size, NUM_CLASSES)) # score for classes
             batch_pred_classes = np.zeros((cur_batch_size, NUM_CLASSES)) # 0/1 for classes
             for vote_idx in range(num_votes):
-                rotated_data = provider.rotate_point_cloud_by_angle(current_data[start_idx:end_idx, :, :],
+                if FLAGS.dataset is "original":
+                    rotated_data = provider.rotate_point_cloud_by_angle(current_data[start_idx:end_idx, :, :],
                                                   vote_idx/float(num_votes) * np.pi * 2)
+                else:
+                    rotated_data = current_data[start_idx:end_idx, :, :]
+                    
                 feed_dict = {ops['pointclouds_pl']: rotated_data,
                              ops['labels_pl']: current_label[start_idx:end_idx],
                              ops['is_training_pl']: is_training}
