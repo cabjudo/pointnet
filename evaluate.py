@@ -15,31 +15,31 @@ import provider
 # import pc_util
 
 
-# model_choices = ["pointnet_cls", "pointnet_cls_basic", "pointnet_no3trans", "pointnet_notrans"]
-# dataset_choices = ["plane0", "plane1", "plane2", "original"]
-# train_test = ["z-z", "z-so3", "so3-so3"]
-
-# parser = argparse.ArgumentParser()
-# parser.add_argument('--gpu', type=int, default=0, help='GPU to use [default: GPU 0]')
-# parser.add_argument('--model', default='pointnet_cls', choices=model_choices, help='Model name: pointnet_cls or pointnet_cls_basic [default: pointnet_cls]')
-# parser.add_argument('--dataset', default='plane1', choices=dataset_choices, help='Dataset: chordiogram representation [default: plane11]')
-# parser.add_argument('--log_dir', default='log', help='Log dir [default: log]')
-# parser.add_argument('--num_point', type=int, default=1024, help='Point Number [256/512/1024/2048] [default: 1024]')
-# parser.add_argument('--max_epoch', type=int, default=250, help='Epoch to run [default: 250]')
-# parser.add_argument('--batch_size', type=int, default=32, help='Batch Size during training [default: 32]')
-# parser.add_argument('--train_test', type=float, default="z-z", help='Decay rate for lr decay [default: z-z]')
-# FLAGS = parser.parse_args()
-
+model_choices = ["pointnet_cls", "pointnet_cls_basic", "pointnet_no3trans", "pointnet_notrans"]
+dataset_choices = ["plane0", "plane1", "plane2", "original"]
+train_test = ["z-z", "z-so3", "so3-so3"]
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--gpu', type=int, default=0, help='GPU to use [default: GPU 0]')
-parser.add_argument('--model', default='pointnet_cls', help='Model name: pointnet_cls or pointnet_cls_basic [default: pointnet_cls]')
-parser.add_argument('--batch_size', type=int, default=4, help='Batch Size during training [default: 1]')
+parser.add_argument('--model', default='pointnet_cls', choices=model_choices, help='Model name: pointnet_cls or pointnet_cls_basic [default: pointnet_cls]')
+parser.add_argument('--dataset', default='plane1', choices=dataset_choices, help='Dataset: chordiogram representation [default: plane11]')
+parser.add_argument('--log_dir', default='log', help='Log dir [default: log]')
 parser.add_argument('--num_point', type=int, default=1024, help='Point Number [256/512/1024/2048] [default: 1024]')
-parser.add_argument('--model_path', default='log/model.ckpt', help='model checkpoint file path [default: log/model.ckpt]')
-parser.add_argument('--dump_dir', default='dump', help='dump folder path [dump]')
-parser.add_argument('--visu', action='store_true', help='Whether to dump image for error case [default: False]')
+parser.add_argument('--max_epoch', type=int, default=250, help='Epoch to run [default: 250]')
+parser.add_argument('--batch_size', type=int, default=32, help='Batch Size during training [default: 32]')
+parser.add_argument('--train_test', type=float, default="z-z", help='Decay rate for lr decay [default: z-z]')
 FLAGS = parser.parse_args()
+
+
+# parser = argparse.ArgumentParser()
+# parser.add_argument('--gpu', type=int, default=0, help='GPU to use [default: GPU 0]')
+# parser.add_argument('--model', default='pointnet_cls', help='Model name: pointnet_cls or pointnet_cls_basic [default: pointnet_cls]')
+# parser.add_argument('--batch_size', type=int, default=4, help='Batch Size during training [default: 1]')
+# parser.add_argument('--num_point', type=int, default=1024, help='Point Number [256/512/1024/2048] [default: 1024]')
+# parser.add_argument('--model_path', default='log/model.ckpt', help='model checkpoint file path [default: log/model.ckpt]')
+# parser.add_argument('--dump_dir', default='dump', help='dump folder path [dump]')
+# parser.add_argument('--visu', action='store_true', help='Whether to dump image for error case [default: False]')
+# FLAGS = parser.parse_args()
 
 
 BATCH_SIZE = FLAGS.batch_size
@@ -59,45 +59,45 @@ SHAPE_NAMES = [line.rstrip() for line in \
 HOSTNAME = socket.gethostname()
 
 # ModelNet40 official train/test split
-TRAIN_FILES = provider.getDataFiles( \
-    os.path.join(BASE_DIR, '/NAS/data/christine/modelnet40_ply_hdf5_2048/train_files.txt'))
-TEST_FILES = provider.getDataFiles(\
-    os.path.join(BASE_DIR, '/NAS/data/christine/modelnet40_ply_hdf5_2048/test_files.txt'))
+# TRAIN_FILES = provider.getDataFiles( \
+#     os.path.join(BASE_DIR, '/NAS/data/christine/modelnet40_ply_hdf5_2048/train_files.txt'))
+# TEST_FILES = provider.getDataFiles(\
+#     os.path.join(BASE_DIR, '/NAS/data/christine/modelnet40_ply_hdf5_2048/test_files.txt'))
 
-# DatasetPath = {
-#     "plane0": {
-#         "train": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane0/train_files.txt'),
-#         "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane0/test_files.txt'),
-#         "num_chord_features": 7,
-#     },
-#     "plane1": {
-#         "train": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane1/train_files.txt'),
-#         "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane1/train_files.txt'),
-#         "num_chord_features": 3,
-#     },
-#     "plane2": {
-#         "train": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane2/train_files.txt'),
-#         "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane2/train_files.txt'),
-#         "num_chord_features": 4,
-#     },
-#     "original": {
-#         "train": os.path.join(BASE_DIR, '/NAS/data/christine/modelnet40_ply_hdf5_2048/train_files.txt'),
-#         "test": os.path.join(BASE_DIR, '/NAS/data/christine/modelnet40_ply_hdf5_2048/test_files.txt'),
-#         "num_chord_features": 3,
-#     }
+DatasetPath = {
+    "plane0": {
+        "train": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane0/train_files.txt'),
+        "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane0/test_files.txt'),
+        "num_chord_features": 7,
+    },
+    "plane1": {
+        "train": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane1/train_files.txt'),
+        "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane1/train_files.txt'),
+        "num_chord_features": 3,
+    },
+    "plane2": {
+        "train": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane2/train_files.txt'),
+        "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane2/train_files.txt'),
+        "num_chord_features": 4,
+    },
+    "original": {
+        "train": os.path.join(BASE_DIR, '/NAS/data/christine/modelnet40_ply_hdf5_2048/train_files.txt'),
+        "test": os.path.join(BASE_DIR, '/NAS/data/christine/modelnet40_ply_hdf5_2048/test_files.txt'),
+        "num_chord_features": 3,
+    }
 
-# }
+}
 
-# DSET_INFO = DatasetPath[FLAGS.dataset]
-# #TRAIN_FILES = provider.getDataFiles( \
-# #    os.path.join(BASE_DIR, 'data/modelnet40_ply_hdf5_2048/train_files.txt'))
-# #TEST_FILES = provider.getDataFiles(\
-# #    os.path.join(BASE_DIR, 'data/modelnet40_ply_hdf5_2048/test_files.txt'))
-# TRAIN_FILES = provider.getDataFiles(DSET_INFO['train'])
-#     # os.path.join(BASE_DIR, '../../data/chords_dataset/train_files_2_angles.txt'))
+DSET_INFO = DatasetPath[FLAGS.dataset]
+#TRAIN_FILES = provider.getDataFiles( \
+#    os.path.join(BASE_DIR, 'data/modelnet40_ply_hdf5_2048/train_files.txt'))
+#TEST_FILES = provider.getDataFiles(\
+#    os.path.join(BASE_DIR, 'data/modelnet40_ply_hdf5_2048/test_files.txt'))
+TRAIN_FILES = provider.getDataFiles(DSET_INFO['train'])
+    # os.path.join(BASE_DIR, '../../data/chords_dataset/train_files_2_angles.txt'))
 
-# TEST_FILES = provider.getDataFiles(DSET_INFO['test'])
-#     # os.path.join(BASE_DIR, '../../data/chords_dataset/test_files_2_angles.txt'))
+TEST_FILES = provider.getDataFiles(DSET_INFO['test'])
+    # os.path.join(BASE_DIR, '../../data/chords_dataset/test_files_2_angles.txt'))
 
 
 def log_string(out_str):
