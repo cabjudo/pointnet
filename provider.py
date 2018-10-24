@@ -63,7 +63,7 @@ def rotate_point_cloud(batch_data, mode, rot_type=None):
 
         if rot_type is 'z':
             rotation_angle = np.random.uniform() * 2 * np.pi
-            rotation_matrix = _rot_z(theta)
+            rotation_matrix = _rot_z(rotation_angle)
         elif rot_type is 'so3': # rot is 'so3'
             alpha, beta, gamma = np.random.uniform(3) * 2 * np.pi
             rotation_matrix = np.dot( np.dot(_rot_z(alpha), _rot_y(beta)), _rot_z(gamma))

@@ -31,7 +31,7 @@ parser.add_argument('--momentum', type=float, default=0.9, help='Initial learnin
 parser.add_argument('--optimizer', default='adam', help='adam or momentum [default: adam]')
 parser.add_argument('--decay_step', type=int, default=200000, help='Decay step for lr decay [default: 200000]')
 parser.add_argument('--decay_rate', type=float, default=0.7, help='Decay rate for lr decay [default: 0.8]')
-parser.add_argument('--train_test', type=float, default="z-z", help='Decay rate for lr decay [default: z-z]')
+parser.add_argument('--train_test', default="z-z", help='Train test setting: z-z]')
 FLAGS = parser.parse_args()
 
 
