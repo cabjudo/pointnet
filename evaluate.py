@@ -27,7 +27,9 @@ parser.add_argument('--log_dir', default='log', help='Log dir [default: log]')
 parser.add_argument('--num_point', type=int, default=1024, help='Point Number [256/512/1024/2048] [default: 1024]')
 parser.add_argument('--max_epoch', type=int, default=250, help='Epoch to run [default: 250]')
 parser.add_argument('--batch_size', type=int, default=32, help='Batch Size during training [default: 32]')
-parser.add_argument('--train_test', type=float, default="z-z", help='Decay rate for lr decay [default: z-z]')
+parser.add_argument('--train_test', default="z-z", help='Decay rate for lr decay [default: z-z]')
+parser.add_argument('--model_path', default='log/model.ckpt', help='model checkpoint file path [default: log/model.ckpt]')
+parser.add_argument('--dump_dir', default='dump', help='dump folder path [dump]')
 FLAGS = parser.parse_args()
 
 
@@ -109,7 +111,7 @@ def evaluate(num_votes):
     is_training = False
      
     with tf.device('/gpu:'+str(GPU_INDEX)):
-        pointclouds_pl, labels_pl = MODEL.placeholder_inputs(BATCH_SIZE, NUM_POINT)
+        pointclouds_pl, labels_pl = MODEL.placeholder_inputs(BATCH_SIZE, NUM_POINT, DSET_INFO['num_chord_features'])
         is_training_pl = tf.placeholder(tf.bool, shape=())
 
         # simple model
