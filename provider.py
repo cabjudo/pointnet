@@ -43,7 +43,7 @@ def _rot_y(theta):
                       [-np.sin(theta), 0, np.cos(theta)] ])
 
 
-def rotate_point_cloud(batch_data, mode, rot_type):
+def rotate_point_cloud(batch_data, mode, rot_type=None):
     """ Randomly rotate the point clouds to augument the dataset
         rotation is per shape based along up direction
         Input:
@@ -54,7 +54,7 @@ def rotate_point_cloud(batch_data, mode, rot_type):
           BxNx3 array, rotated batch of point clouds
     """
     
-    if rot_type not None:
+    if rot_type is not None:
         idx = 1 if mode is 'train' else 0
         rot_type = rot_type.split('-')[idx]
 

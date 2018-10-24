@@ -12,7 +12,23 @@ sys.path.append(BASE_DIR)
 sys.path.append(os.path.join(BASE_DIR, 'models'))
 sys.path.append(os.path.join(BASE_DIR, 'utils'))
 import provider
-import pc_util
+# import pc_util
+
+
+# model_choices = ["pointnet_cls", "pointnet_cls_basic", "pointnet_no3trans", "pointnet_notrans"]
+# dataset_choices = ["plane0", "plane1", "plane2", "original"]
+# train_test = ["z-z", "z-so3", "so3-so3"]
+
+# parser = argparse.ArgumentParser()
+# parser.add_argument('--gpu', type=int, default=0, help='GPU to use [default: GPU 0]')
+# parser.add_argument('--model', default='pointnet_cls', choices=model_choices, help='Model name: pointnet_cls or pointnet_cls_basic [default: pointnet_cls]')
+# parser.add_argument('--dataset', default='plane1', choices=dataset_choices, help='Dataset: chordiogram representation [default: plane11]')
+# parser.add_argument('--log_dir', default='log', help='Log dir [default: log]')
+# parser.add_argument('--num_point', type=int, default=1024, help='Point Number [256/512/1024/2048] [default: 1024]')
+# parser.add_argument('--max_epoch', type=int, default=250, help='Epoch to run [default: 250]')
+# parser.add_argument('--batch_size', type=int, default=32, help='Batch Size during training [default: 32]')
+# parser.add_argument('--train_test', type=float, default="z-z", help='Decay rate for lr decay [default: z-z]')
+# FLAGS = parser.parse_args()
 
 
 parser = argparse.ArgumentParser()
@@ -44,9 +60,45 @@ HOSTNAME = socket.gethostname()
 
 # ModelNet40 official train/test split
 TRAIN_FILES = provider.getDataFiles( \
-    os.path.join(BASE_DIR, 'data/modelnet40_ply_hdf5_2048/train_files.txt'))
+    os.path.join(BASE_DIR, '/NAS/data/christine/modelnet40_ply_hdf5_2048/train_files.txt'))
 TEST_FILES = provider.getDataFiles(\
-    os.path.join(BASE_DIR, 'data/modelnet40_ply_hdf5_2048/test_files.txt'))
+    os.path.join(BASE_DIR, '/NAS/data/christine/modelnet40_ply_hdf5_2048/test_files.txt'))
+
+# DatasetPath = {
+#     "plane0": {
+#         "train": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane0/train_files.txt'),
+#         "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane0/test_files.txt'),
+#         "num_chord_features": 7,
+#     },
+#     "plane1": {
+#         "train": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane1/train_files.txt'),
+#         "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane1/train_files.txt'),
+#         "num_chord_features": 3,
+#     },
+#     "plane2": {
+#         "train": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane2/train_files.txt'),
+#         "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane2/train_files.txt'),
+#         "num_chord_features": 4,
+#     },
+#     "original": {
+#         "train": os.path.join(BASE_DIR, '/NAS/data/christine/modelnet40_ply_hdf5_2048/train_files.txt'),
+#         "test": os.path.join(BASE_DIR, '/NAS/data/christine/modelnet40_ply_hdf5_2048/test_files.txt'),
+#         "num_chord_features": 3,
+#     }
+
+# }
+
+# DSET_INFO = DatasetPath[FLAGS.dataset]
+# #TRAIN_FILES = provider.getDataFiles( \
+# #    os.path.join(BASE_DIR, 'data/modelnet40_ply_hdf5_2048/train_files.txt'))
+# #TEST_FILES = provider.getDataFiles(\
+# #    os.path.join(BASE_DIR, 'data/modelnet40_ply_hdf5_2048/test_files.txt'))
+# TRAIN_FILES = provider.getDataFiles(DSET_INFO['train'])
+#     # os.path.join(BASE_DIR, '../../data/chords_dataset/train_files_2_angles.txt'))
+
+# TEST_FILES = provider.getDataFiles(DSET_INFO['test'])
+#     # os.path.join(BASE_DIR, '../../data/chords_dataset/test_files_2_angles.txt'))
+
 
 def log_string(out_str):
     LOG_FOUT.write(out_str+'\n')
@@ -150,8 +202,8 @@ def eval_one_epoch(sess, ops, num_votes=1, topk=1):
                     img_filename = '%d_label_%s_pred_%s.jpg' % (error_cnt, SHAPE_NAMES[l],
                                                            SHAPE_NAMES[pred_val[i-start_idx]])
                     img_filename = os.path.join(DUMP_DIR, img_filename)
-                    output_img = pc_util.point_cloud_three_views(np.squeeze(current_data[i, :, :]))
-                    scipy.misc.imsave(img_filename, output_img)
+                    # output_img = pc_util.point_cloud_three_views(np.squeeze(current_data[i, :, :]))
+                    # scipy.misc.imsave(img_filename, output_img)
                     error_cnt += 1
                 
     log_string('eval mean loss: %f' % (loss_sum / float(total_seen)))

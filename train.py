@@ -15,7 +15,7 @@ import provider
 import tf_util
 
 model_choices = ["pointnet_cls", "pointnet_cls_basic", "pointnet_no3trans", "pointnet_notrans"]
-dataset_choices = ["plane0", "plane1", "plane2"]
+dataset_choices = ["plane0", "plane1", "plane2", "original"]
 train_test = ["z-z", "z-so3", "so3-so3"]
 
 parser = argparse.ArgumentParser()
@@ -81,7 +81,13 @@ DatasetPath = {
         "train": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane2/train_files.txt'),
         "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane2/train_files.txt'),
         "num_chord_features": 4,
+    },
+    "original": {
+        "train": os.path.join(BASE_DIR, '/NAS/data/christine/modelnet40_ply_hdf5_2048/train_files.txt'),
+        "test": os.path.join(BASE_DIR, '/NAS/data/christine/modelnet40_ply_hdf5_2048/test_files.txt'),
+        "num_chord_features": 3,
     }
+
 }
 
 DSET_INFO = DatasetPath[FLAGS.dataset]
