@@ -32,6 +32,7 @@ parser.add_argument('--optimizer', default='adam', help='adam or momentum [defau
 parser.add_argument('--decay_step', type=int, default=200000, help='Decay step for lr decay [default: 200000]')
 parser.add_argument('--decay_rate', type=float, default=0.7, help='Decay rate for lr decay [default: 0.8]')
 parser.add_argument('--train_test', default="z-z", help='Train test setting: z-z]')
+parser.add_argument('--flip_train_test', default=False, help='Flips thet training and testing dataset')
 FLAGS = parser.parse_args()
 
 
@@ -45,6 +46,7 @@ OPTIMIZER = FLAGS.optimizer
 DECAY_STEP = FLAGS.decay_step
 DECAY_RATE = FLAGS.decay_rate
 TRAIN_TEST = FLAGS.train_test
+FLIP_TRAIN_TEST = FLAGS.flip_train_test
 
 MODEL = importlib.import_module(FLAGS.model) # import network module
 MODEL_FILE = os.path.join(BASE_DIR, 'models', FLAGS.model+'.py')
@@ -100,6 +102,12 @@ TRAIN_FILES = provider.getDataFiles(DSET_INFO['train'])
 
 TEST_FILES = provider.getDataFiles(DSET_INFO['test'])
     # os.path.join(BASE_DIR, '../../data/chords_dataset/test_files_2_angles.txt'))
+
+# Flips the training and testing datasets
+if FLIP_TRAIN_TEST:
+    AUX_FLIP = TRAIN_FILES
+    TRAIN_FILES = TEST_FILES
+    TEST_FILES = AUX_FLIP
 
 def log_string(out_str):
     LOG_FOUT.write(out_str+'\n')
@@ -259,7 +267,7 @@ def train_one_epoch(sess, ops, train_writer):
             # Augment batched point clouds by rotation and jittering
             # rotation depends on dataset and train/test type
             # if TRAIN_TEST in ["z-z", "z-so3"]: train with azimuthal rotations else: train with so3
-            rotated_data = provider.rotate_point_cloud(current_data[start_idx:end_idx, :, :], 'train', TRAIN_TEST)
+            #rotated_data = provider.rotate_point_cloud(current_data[start_idx:end_idx, :, :], 'train', TRAIN_TEST)
             jittered_data = provider.jitter_point_cloud(current_data[start_idx:end_idx, :, :])
             #jittered_data = current_data[start_idx:end_idx, :, :]
             feed_dict = {ops['pointclouds_pl']: jittered_data,
