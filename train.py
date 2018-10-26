@@ -32,7 +32,7 @@ parser.add_argument('--optimizer', default='adam', help='adam or momentum [defau
 parser.add_argument('--decay_step', type=int, default=200000, help='Decay step for lr decay [default: 200000]')
 parser.add_argument('--decay_rate', type=float, default=0.7, help='Decay rate for lr decay [default: 0.8]')
 parser.add_argument('--train_test', default="z-z", help='Train test setting: z-z]')
-parser.add_argument('--flip_train_test', default=False, help='Flips thet training and testing dataset')
+parser.add_argument('--flip_train_test', default=False, help='Flips training and testing dataset')
 FLAGS = parser.parse_args()
 
 
@@ -76,12 +76,12 @@ DatasetPath = {
     },
     "plane1": {
         "train": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane1/train_files.txt'),
-        "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane1/train_files.txt'),
+        "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane1/test_files.txt'),
         "num_chord_features": 3,
     },
     "plane2": {
         "train": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane2/train_files.txt'),
-        "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane2/train_files.txt'),
+        "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane2/test_files.txt'),
         "num_chord_features": 4,
     },
     "original": {
@@ -240,6 +240,10 @@ def train():
 
 def train_one_epoch(sess, ops, train_writer):
     """ ops: dict mapping from string to tf ops """
+
+    print("Using {} for training.".format(TRAIN_FILES))
+    print("Using {} for testing.".format(TEST_FILES))
+
     is_training = True
 
     # Shuffle train files
