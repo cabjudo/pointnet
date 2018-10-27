@@ -315,7 +315,7 @@ def eval_one_epoch(sess, ops, test_writer):
             # Augment batched point clouds by rotation and jittering
             # rotation depends on dataset and train/test type
             # if TRAIN_TEST in ["so3-so3", "z-so3"]: test with arbitrary rotations else: test with z
-            rotated_data = provider.rotate_point_cloud(current_data[start_idx:end_idx, :, :], 'test', TRAIN_TEST)
+            #rotated_data = provider.rotate_point_cloud(current_data[start_idx:end_idx, :, :], 'test', TRAIN_TEST)
             feed_dict = {ops['pointclouds_pl']: current_data[start_idx:end_idx, :, :],
                          ops['labels_pl']: current_label[start_idx:end_idx],
                          ops['is_training_pl']: is_training}
