@@ -75,20 +75,24 @@ DatasetPath = {
     },
     "plane1": {
         "train": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane1/train_files.txt'),
-        "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane1/train_files.txt'),
+        "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane1/test_files.txt'),
         "num_chord_features": 3,
     },
     "plane2": {
         "train": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane2/train_files.txt'),
-        "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane2/train_files.txt'),
+        "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane2/test_files.txt'),
         "num_chord_features": 4,
     },
     "original": {
         "train": os.path.join(BASE_DIR, '/NAS/data/christine/modelnet40_ply_hdf5_2048/train_files.txt'),
         "test": os.path.join(BASE_DIR, '/NAS/data/christine/modelnet40_ply_hdf5_2048/test_files.txt'),
         "num_chord_features": 3,
-    }
-
+    },
+    "darboux": {
+        "train": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/darboux/train_files.txt'),
+        "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/darboux/test_files.txt'),
+        "num_chord_features": 5,
+    },
 }
 
 DSET_INFO = DatasetPath[FLAGS.dataset]
