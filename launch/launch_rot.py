@@ -3,15 +3,15 @@ import numpy as np
 import os
 import subprocess
 
-test_train_rot = ['z-z', 'z-so3', 'so3-so3']
-model_choices = ["pointnet_cls", "pointnet_notrans", "pointnet_notrans"]
-data_choices = ["orig", "plane1", "plane2"]
-lr = [ 1e-3, 5.3202e-04, 1.9118e-03 ]
+train_test_rot = ['z-z', 'z-so3', 'so3-so3']
+model_choices = ["pointnet_cls", "pointnet_notrans"]
+data_choices = ["original"]
 
-for data, arch, l in zip(data_choices, model_choices, lr):
-    for num in range(1):
-        for test_train in test_train_rot:
-            name = '{}-{}-lr-{:.4e}'.format(data, arch[9:], l)
+for data in dataset_choices:
+    for arch in model_choices:
+        for train_test in train_test_rot:
+            num = 0
+            name = '{}-{}-rot'.format(data, arch[9:])
             name = name.replace('_', '-')
             name = name.replace('.', '-')
             name = name.replace('+', '')
@@ -31,7 +31,6 @@ for data, arch, l in zip(data_choices, model_choices, lr):
                 '--log_dir=save/save-{}'.format(name),
                 '--dataset={}'.format(data),
                 '--model={}'.format(arch),
-                '--learning_rate={}'.format(l),
                 '--optimizer=adam',
                 '--batch_size=32',
                 '--num_point=1024',
@@ -39,7 +38,7 @@ for data, arch, l in zip(data_choices, model_choices, lr):
                 '--momentum=0.9',
                 '--decay_step=200000',
                 '--decay_rate=0.8',
-                '--train_test={}'.format(test_train)
+                '--train_test={}'.format(train_test)
             ]
             
             # create yaml file

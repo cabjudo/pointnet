@@ -271,7 +271,10 @@ def train_one_epoch(sess, ops, train_writer):
             # Augment batched point clouds by rotation and jittering
             # rotation depends on dataset and train/test type
             # if TRAIN_TEST in ["z-z", "z-so3"]: train with azimuthal rotations else: train with so3
-            #rotated_data = provider.rotate_point_cloud(current_data[start_idx:end_idx, :, :], 'train', TRAIN_TEST)
+            if FLAGS.dataset in ["original"]:
+                rotated_data = provider.rotate_point_cloud(current_data[start_idx:end_idx, :, :], 'train', TRAIN_TEST)
+            else:
+                rotated_data = current_data[start_idx:end_idx, :, :]
             jittered_data = provider.jitter_point_cloud(current_data[start_idx:end_idx, :, :])
             #jittered_data = current_data[start_idx:end_idx, :, :]
             feed_dict = {ops['pointclouds_pl']: jittered_data,
@@ -315,7 +318,11 @@ def eval_one_epoch(sess, ops, test_writer):
             # Augment batched point clouds by rotation and jittering
             # rotation depends on dataset and train/test type
             # if TRAIN_TEST in ["so3-so3", "z-so3"]: test with arbitrary rotations else: test with z
-            #rotated_data = provider.rotate_point_cloud(current_data[start_idx:end_idx, :, :], 'test', TRAIN_TEST)
+            if FLAGS.dataset in ["original"]:
+                rotated_data = provider.rotate_point_cloud(current_data[start_idx:end_idx, :, :], 'test', TRAIN_TEST)
+            else:
+                rotated_data = current_data[start_idx:end_idx, :, :]
+            
             feed_dict = {ops['pointclouds_pl']: current_data[start_idx:end_idx, :, :],
                          ops['labels_pl']: current_label[start_idx:end_idx],
                          ops['is_training_pl']: is_training}
