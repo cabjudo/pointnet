@@ -10,8 +10,7 @@ data_choices = ["original"]
 for data in dataset_choices:
     for arch in model_choices:
         for train_test in train_test_rot:
-            num = 0
-            name = '{}-{}-rot'.format(data, arch[9:])
+            name = '{}-{}-train-test-{}'.format(data, arch[9:], train_test)
             name = name.replace('_', '-')
             name = name.replace('.', '-')
             name = name.replace('+', '')
