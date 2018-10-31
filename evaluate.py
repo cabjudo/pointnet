@@ -223,7 +223,7 @@ def eval_one_epoch(sess, ops, num_votes=1, topk=1):
     
     class_accuracies = np.array(total_correct_class)/np.array(total_seen_class,dtype=np.float)
     for i, name in enumerate(SHAPE_NAMES):
-        log_string('%10s:\t%0.3f' % (name, class_accuracies[i]))
+        log_string('%10s:\t%0.3f\t%d' % (name, class_accuracies[i], total_seen_class))
     
 
 
