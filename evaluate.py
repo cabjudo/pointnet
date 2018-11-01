@@ -50,6 +50,7 @@ NUM_POINT = FLAGS.num_point
 MODEL_PATH = FLAGS.model_path
 GPU_INDEX = FLAGS.gpu
 MODEL = importlib.import_module(FLAGS.model) # import network module
+TRAIN_TEST = FLAGS.train_test
 DUMP_DIR = FLAGS.dump_dir
 if not os.path.exists(DUMP_DIR): os.mkdir(DUMP_DIR)
 LOG_FOUT = open(os.path.join(DUMP_DIR, 'log_evaluate.txt'), 'w')
@@ -176,9 +177,8 @@ def eval_one_epoch(sess, ops, num_votes=1, topk=1):
             batch_pred_sum = np.zeros((cur_batch_size, NUM_CLASSES)) # score for classes
             batch_pred_classes = np.zeros((cur_batch_size, NUM_CLASSES)) # 0/1 for classes
             for vote_idx in range(num_votes):
-                if FLAGS.dataset is "original":
-                    rotated_data = provider.rotate_point_cloud_by_angle(current_data[start_idx:end_idx, :, :],
-                                                  vote_idx/float(num_votes) * np.pi * 2)
+                if FLAGS.dataset in ["original"]:
+                    rotated_data = provider.rotate_point_cloud(current_data[start_idx:end_idx, :, :], 'test', TRAIN_TEST)
                 else:
                     rotated_data = current_data[start_idx:end_idx, :, :]
                     

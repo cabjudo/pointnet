@@ -43,7 +43,7 @@ def _rot_y(theta):
                       [-np.sin(theta), 0, np.cos(theta)] ])
 
 
-def rotate_point_cloud(batch_data, mode, rot_type=None):
+def rotate_point_cloud(batch_data, mode, rot_type):
     """ Randomly rotate the point clouds to augument the dataset
         rotation is per shape based along up direction
         Input:
@@ -54,27 +54,25 @@ def rotate_point_cloud(batch_data, mode, rot_type=None):
           BxNx3 array, rotated batch of point clouds
     """
     
-    if rot_type is not None:
-        idx = 1 if mode is 'train' else 0
+    if rot_type not in ['None']:
+        idx = 0 if mode is 'train' else 1
         rot_type = rot_type.split('-')[idx]
+    else:
+        return batch_data
 
     rotated_data = np.zeros(batch_data.shape, dtype=np.float32)
     for k in range(batch_data.shape[0]):
 
-        if rot_type is 'z':
+        if rot_type in ['z']:
+            print("rot type={}".format(rot_type))
             rotation_angle = np.random.uniform() * 2 * np.pi
             rotation_matrix = _rot_z(rotation_angle)
-        elif rot_type is 'so3': # rot is 'so3'
-            alpha, beta, gamma = np.random.uniform(3) * 2 * np.pi
+        elif rot_type in ['so3']: # rot is 'so3'
+            print("rot type={}".format(rot_type))
+            alpha, beta, gamma = np.random.uniform(size=3) * 2 * np.pi
             rotation_matrix = np.dot( np.dot(_rot_z(alpha), _rot_y(beta)), _rot_z(gamma))
         else: # rot_type is None
             rotation_matrix = np.eye(3)
-
-        # cosval = np.cos(rotation_angle)
-        # sinval = np.sin(rotation_angle)
-        # rotation_matrix = np.array([[cosval, 0, sinval],
-        #                             [0, 1, 0],
-        #                             [-sinval, 0, cosval]])
 
         shape_pc = batch_data[k, ...]
         rotated_data[k, ...] = np.dot(shape_pc.reshape((-1, 3)), rotation_matrix)
