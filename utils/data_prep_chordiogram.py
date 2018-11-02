@@ -54,23 +54,12 @@ def cartesian2spherical(x, y, z, r=None):
 
 def _sample_chords(mesh, num_samples, sampling_method='random'):
 
-    if num_samples > mesh.faces.shape[0]**2:
-
-        num_sample_faces = mesh.faces.shape[0] ** 2
-        idx = np.arange(mesh.faces.shape[0])
-        chord_pairs = np.transpose([np.tile(idx, idx.size), np.repeat(idx, idx.size)])
-        aux = np.arange(num_sample_faces)
-        np.random.shuffle(aux)
-        chord_pairs = chord_pairs[aux, :]
-
+    num_sample_faces = num_samples
+    if sampling_method == 'area_weighted':
+        p = mesh.area_faces / mesh.area
     else:
-
-        num_sample_faces = num_samples
-        if sampling_method == 'area_weighted':
-            p = mesh.area_faces / mesh.area
-        else:
-            p = np.ones(mesh.faces.shape[0]) / mesh.faces.shape[0]
-        chord_pairs = np.random.choice(mesh.faces.shape[0], size=(num_samples, 2), p=p)
+        p = np.ones(mesh.faces.shape[0]) / mesh.faces.shape[0]
+    chord_pairs = np.random.choice(mesh.faces.shape[0], size=(num_samples, 2), p=p)
 
     sample_faces_left = mesh.faces[chord_pairs[:, 0], :]
     sample_faces_right = mesh.faces[chord_pairs[:, 1], :]
@@ -97,7 +86,7 @@ def _compute_point_in_triangle(mesh, num_sample_faces, face_indexes):
     return points
 
 
-def get_chords1(mesh, num_samples=100, sampling_method='uniform'):
+def plane0_chord_representation(mesh, num_samples=100, sampling_method='uniform'):
     m, n_p, n_q, num_chords = _sample_chords(mesh, num_samples, sampling_method)
     r = np.sqrt(np.sum(m ** 2, axis=1))
 
@@ -121,7 +110,7 @@ def get_chords1(mesh, num_samples=100, sampling_method='uniform'):
     return chrs
 
 
-def get_chords2(mesh, num_samples=100, sampling_method='uniform'):
+def plane1_chord_representation(mesh, num_samples=100, sampling_method='uniform'):
     m, n_p, n_q, num_chords = _sample_chords(mesh, num_samples, sampling_method)
     r = np.sqrt(np.sum(m ** 2, axis=1))
 
@@ -145,7 +134,7 @@ def get_chords2(mesh, num_samples=100, sampling_method='uniform'):
     return chrs
 
 
-def get_chords3(mesh, num_samples=100, sampling_method='uniform'):
+def plane2_chord_representation(mesh, num_samples=100, sampling_method='uniform'):
     m, n_p, n_q, num_chords = _sample_chords(mesh, num_samples, sampling_method)
     r = np.sqrt(np.sum(m ** 2, axis=1))
 
@@ -173,18 +162,54 @@ def get_chords3(mesh, num_samples=100, sampling_method='uniform'):
     return chrs
 
 
-METHODS = {1: {'name': 'plane0', 'num_features': 7, 'function': get_chords1},
-           2: {'name': 'plane1', 'num_features': 3, 'function': get_chords2},
-           3: {'name': 'plane2', 'num_features': 4, 'function': get_chords3}
+def darboux_chord_representation(mesh, num_samples=100, sampling_method='uniform'):
+    m, n_p, n_q, num_chords = _sample_chords(mesh, num_samples, sampling_method)
+    r = np.sqrt(np.sum(m ** 2, axis=1))
+
+    chrs = np.zeros((num_samples, 5))
+
+    # Computes the orthonormal basis if the Darboux frame
+    u = n_p  # Normals are already unit vectors
+    v = np.cross(u, -m)
+    v /= np.linalg.norm(v, axis=1)[:, None]
+    w = np.cross(u, v)
+    w /= np.linalg.norm(w, axis=1)[:, None]
+
+    # length of the chord
+    chrs[0:num_chords, 0] = r
+
+    # Orientation of the normal at p wrt the chord
+    ori_p = np.sum(m * n_p, axis=1) / (np.linalg.norm(m, axis=1))
+    #chrs[0:num_chords, 1] = ori_p
+
+    # Orientation of the normal at q wrt the chord
+    #ori_q = np.sum(- m * n_q, axis=1) / (np.linalg.norm(m, axis=1))
+    #chrs[0:num_chords, 2] = ori_q
+
+    # Angle between the two planes formed by the normal and the plane
+    #plane_p = np.cross(n_p, m)
+    #plane_q = np.cross(n_q, m)
+    #plane_angle = np.sum(plane_p * plane_q, axis=1) / (
+    #    np.linalg.norm(plane_p, axis=1) * np.linalg.norm(plane_q, axis=1))
+    #chrs[0:num_chords, 3] = plane_angle
+
+    return chrs
+
+METHODS = {
+    'plane0': {'num_features': 7, 'function': plane0_chord_representation},
+    'plane1': {'num_features': 3, 'function': plane1_chord_representation},
+    'plane2': {'num_features': 4, 'function': plane2_chord_representation},
+    'darboux': {'num_features': 5, 'function': darboux_chord_representation},
            }
 
 
-def create_chordiogram_h5(file_num, batch_size, classes, paths, output_path, sampling_method, num_samples=100,
-                          chord_type=1,
+def create_chordiogram_h5(file_num, classes, paths, output_path, sampling_method, num_samples=100,
+                          chord_type='plane1',
                           mode='train'):
     output_filename = os.path.join(output_path,
-                                   'modelnet40_chords_{}_{}_num_samples_{}_{}{}.h5'.format(sampling_method, METHODS[chord_type]['name'],
+                                   'modelnet40_chords_{}_{}_num_samples_{}_{}{}.h5'.format(sampling_method, chord_type,
                                                                                        num_samples, mode, file_num))
+    batch_size = len(paths)
     data = np.zeros((batch_size, num_samples, METHODS[chord_type]['num_features']))
     labels = np.zeros((batch_size, 1), dtype=int)
 
@@ -212,6 +237,7 @@ def create_chordiogram_h5(file_num, batch_size, classes, paths, output_path, sam
 if __name__ == '__main__':
 
     sampling_methods = ['random', 'area_weighted']
+    dataset_choices = ["plane0", "plane1", "plane2", "original", "darboux"]
 
     parser = argparse.ArgumentParser()
 
@@ -220,12 +246,16 @@ if __name__ == '__main__':
     parser.add_argument('-m', '--method', help="Method to sample the point cloud", dest="sampling_method",
                         choices=sampling_methods, default='random')
     parser.add_argument('-o', '--output', help="Output folder", dest='output_dataset')
-    parser.add_argument('-c', '--chord_type', help="Chord feature type", dest='chord_type', default=1, type=int)
+    parser.add_argument('-c', '--chord_type', choices=dataset_choices, help="Chord feature type", dest='chord_type', default='plane2')
     parser.add_argument('-n', '--num_samples', help="num of random samples", dest='num_samples', default=2048, type=int)
     args = parser.parse_args()
 
     if not os.path.exists(args.output_dataset):
         os.makedirs(args.output_dataset)
+
+    dset_folder = os.path.expanduser(os.path.join(args.output_dataset, args.chord_type))
+    if not os.path.exists(dset_folder):
+        os.makedirs(dset_folder)
 
     all_train_paths = np.array(glob.glob(os.path.join(args.input_dataset, '*/train/*.off')))
     all_test_paths = np.array(glob.glob(os.path.join(args.input_dataset, '*/test/*.off')))
@@ -235,32 +265,32 @@ if __name__ == '__main__':
     # all_paths = all_train_paths if args.mode == 'train' else all_test_paths
 
     # generate de classes label
-    i = 0
-    classes = {}
+    classes = []
     for f in all_train_paths:
         path = os.path.normpath(f)
         s = path.split(os.sep)[-3]
         if s not in classes:
-            classes[s] = i
-            i += 1
+            classes.append(s)
+    classes.sort()
+    classes = dict(zip(classes, range(len(classes))))
 
     num_h5_train = int(np.ceil(len(all_train_paths) / args.batch_size))
     d = args.batch_size
-    #for i in range(num_h5_train):
-    #   create_chordiogram_h5(i, d, classes, all_train_paths[i * d:(i + 1) * d], args.output_dataset,
-    #                         args.sampling_method, args.num_samples, args.chord_type, 'train')
+    for i in range(num_h5_train):
+       create_chordiogram_h5(i, classes, all_train_paths[i * d:(i + 1) * d], dset_folder,
+                             args.sampling_method, args.num_samples, args.chord_type, 'train')
 
     num_h5_train = int(np.ceil(len(all_train_paths) / args.batch_size))
     d = args.batch_size
     Parallel(n_jobs=-1, timeout=600)(
-        delayed(create_chordiogram_h5)(i, d, classes, all_train_paths[i * d:(i + 1) * d], args.output_dataset,
+        delayed(create_chordiogram_h5)(i, classes, all_train_paths[i * d:(i + 1) * d], dset_folder,
                                        args.sampling_method, args.num_samples, args.chord_type, 'train')
         for i in range(num_h5_train))
 
     num_h5_test = int(np.ceil(len(all_test_paths) / args.batch_size))
     d = args.batch_size
     Parallel(n_jobs=-1, timeout=600)(
-        delayed(create_chordiogram_h5)(i, d, classes, all_test_paths[i * d:(i + 1) * d], args.output_dataset,
+        delayed(create_chordiogram_h5)(i, classes, all_test_paths[i * d:(i + 1) * d], dset_folder,
                                        args.sampling_method, args.num_samples, args.chord_type, 'test')
         for i in range(num_h5_test))
 
