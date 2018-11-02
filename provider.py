@@ -112,7 +112,10 @@ def rotate_plane0_point_cloud(batch_data, mode, rot_type):
             rotation = np.zeros(7)
 
         shape_pc = batch_data[k, ...]
-        rotated_data[k, ...] = shape_pc.reshape((-1, 7)) + rotation.reshape((-1,7))
+        rotated_shape_pc = shape_pc.reshape((-1, 7)) + rotation.reshape((-1,7))
+        rotated_shape_pc[1] = rotated_shape_pc[1] % (2 * np.pi)
+        rotated_shape_pc[2] = rotated_shape_pc[2] % np.pi
+        rotated_data[k, ...] = rotated_shape_pc
     return rotated_data
 
 
