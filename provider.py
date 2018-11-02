@@ -64,11 +64,11 @@ def rotate_point_cloud(batch_data, mode, rot_type):
     for k in range(batch_data.shape[0]):
 
         if rot_type in ['z']:
-            print("rot type={}".format(rot_type))
+            # print("rot type={}".format(rot_type))
             rotation_angle = np.random.uniform() * 2 * np.pi
             rotation_matrix = _rot_z(rotation_angle)
         elif rot_type in ['so3']: # rot is 'so3'
-            print("rot type={}".format(rot_type))
+            # print("rot type={}".format(rot_type))
             alpha, beta, gamma = np.random.uniform(size=3) * 2 * np.pi
             rotation_matrix = np.dot( np.dot(_rot_z(alpha), _rot_y(beta)), _rot_z(gamma))
         else: # rot_type is None

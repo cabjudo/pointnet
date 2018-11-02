@@ -275,7 +275,7 @@ def train_one_epoch(sess, ops, train_writer):
                 rotated_data = provider.rotate_point_cloud(current_data[start_idx:end_idx, :, :], 'train', TRAIN_TEST)
             else:
                 rotated_data = current_data[start_idx:end_idx, :, :]
-            jittered_data = provider.jitter_point_cloud(current_data[start_idx:end_idx, :, :])
+            jittered_data = provider.jitter_point_cloud(rotated_data)
             #jittered_data = current_data[start_idx:end_idx, :, :]
             feed_dict = {ops['pointclouds_pl']: jittered_data,
                          ops['labels_pl']: current_label[start_idx:end_idx],
