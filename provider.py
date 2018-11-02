@@ -79,6 +79,44 @@ def rotate_point_cloud(batch_data, mode, rot_type):
     return rotated_data
 
 
+def rotate_plane0_point_cloud(batch_data, mode, rot_type):
+    """ Randomly rotate the point clouds to augument the dataset
+        rotation is per shape based along up direction
+        Input:
+          BxNx7 array, original batch of point clouds
+          mode: ['train', 'test']
+          rot_type: ['z-z', 'z-so3', 'so3-so3']
+        Return:
+          BxNx7 array, rotated batch of point clouds
+    """
+    
+    if rot_type not in ['None']:
+        idx = 0 if mode is 'train' else 1
+        rot_type = rot_type.split('-')[idx]
+    else:
+        return batch_data
+
+    rotated_data = np.zeros(batch_data.shape, dtype=np.float32)
+    for k in range(batch_data.shape[0]):
+
+        if rot_type in ['z']:
+            # print("rot type={}".format(rot_type))
+            rotation = np.zeros(7)
+            rotation[1] = np.random.uniform() * 2 * np.pi
+        elif rot_type in ['so3']: # rot is 'so3'
+            # print("rot type={}".format(rot_type))
+            rotation = np.zeros(7)
+            rotation[1] = np.random.uniform() * 2 * np.pi
+            rotation[2] = np.random.uniform() * np.pi
+        else: # rot_type is None
+            rotation = np.zeros(7)
+
+        shape_pc = batch_data[k, ...]
+        rotated_data[k, ...] = shape_pc.reshape((-1, 7)) + rotation.reshape((-1,7))
+    return rotated_data
+
+
+
 def rotate_point_cloud_by_angle(batch_data, rotation_angle):
     """ Rotate the point cloud along up direction with certain angle.
         Input:
