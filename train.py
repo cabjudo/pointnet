@@ -331,8 +331,8 @@ def eval_one_epoch(sess, ops, test_writer):
                 rotated_data = provider.rotate_plane0_point_cloud(current_data[start_idx:end_idx, :, :], 'test', TRAIN_TEST)
             else:
                 rotated_data = current_data[start_idx:end_idx, :, :]
-            
-            feed_dict = {ops['pointclouds_pl']: current_data[start_idx:end_idx, :, :],
+
+            feed_dict = {ops['pointclouds_pl']: rotated_data,
                          ops['labels_pl']: current_label[start_idx:end_idx],
                          ops['is_training_pl']: is_training}
             summary, step, loss_val, pred_val = sess.run([ops['merged'], ops['step'],
