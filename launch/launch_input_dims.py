@@ -3,16 +3,19 @@ import numpy as np
 import os
 import subprocess
 
+samples = 10
+# for learning rates, 10^-5 --> 10^-2 choose random numbers between 2 and 5
+# np.random.rand returns values [0, 1)
+lr_exponent = 2 + np.random.rand(samples) * 3
+lr = np.power(10, -lr_exponent)
 
-model_choices = ["pointnet_notrans"]
-data_choices = ["plane1", "plane2"]
-lr = [ 5.3202e-04, 1.9118e-03 ] # best learning rate for plane1, plane2 respectively
-indims = [256, 512, 1024, 2048]
+model_choices = ["pointnet_cls", "pointnet_no3trans", "pointnet_notrans"]
+data_choices = ["plane0", "plane1", "plane2", "darboux"]
 
-for data, l in zip(data_choices, lr):
+for data in data_choices:
     for arch in model_choices:
-       for num_point in indims:
-           for num in range(1):
+        for num in range(1):
+            for l in lr:
                 name = '{}-{}-lr-{:.4e}'.format(data, arch[9:], l)
                 name = name.replace('_', '-')
                 name = name.replace('.', '-')
@@ -36,7 +39,7 @@ for data, l in zip(data_choices, lr):
                     '--learning_rate={}'.format(l),
                     '--optimizer=adam',
                     '--batch_size=32',
-                    '--num_point={}'.format(num_point),
+                    '--num_point=1024',
                     '--max_epoch=250',
                     '--momentum=0.9',
                     '--decay_step=200000',
@@ -48,7 +51,7 @@ for data, l in zip(data_choices, lr):
                 # Run commands in shell
                 subprocess.call(kcreator_cmd)
                 # print('kcreator_cmd', kcreator_cmd)
-                subprocess.call(kubectl_create_cmd)
+                #subprocess.call(kubectl_create_cmd)
                 # print('kubectl_create_cmd', kubectl_create_cmd)
 
 get_pods_cmd = ['kubectl', 'get', 'pods']
