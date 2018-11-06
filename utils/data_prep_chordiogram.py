@@ -45,7 +45,7 @@ def cartesian2spherical(x, y, z, r=None):
     if r is None:
         r = np.sqrt(x ** 2 + y ** 2 + z ** 2)
 
-    phi = np.arctan2(y, x)
+    phi = (np.arctan2(y, x) + 2*np.pi) % (2*np.pi)
     theta = np.arccos(z / r)
     theta = np.nan_to_num(theta)
 
