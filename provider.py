@@ -2,6 +2,9 @@ import os
 import sys
 import numpy as np
 import h5py
+
+from utils.data_prep_chordiogram import spherical2cartesian, cartesian2spherical
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(BASE_DIR)
 
@@ -90,21 +93,18 @@ def rotate_plane0_point_cloud(batch_data, mode, rot_type):
           BxNx7 array, rotated batch of point clouds
     """
     
-    if rot_type not in ['None']:
-        idx = 0 if mode is 'train' else 1
-        rot_type = rot_type.split('-')[idx]
-    else:
-        return batch_data
+    idx = 0 if mode is 'train' else 1
+    rot_type = rot_type.split('-')[idx]
 
     rotated_data = np.zeros(batch_data.shape, dtype=np.float32)
     for k in range(batch_data.shape[0]):
 
         if rot_type in ['z']:
-            # print("rot type={}".format(rot_type))
+            print("mode={}, idx={}, rot type={}".format(mode, idx,rot_type))
             rotation = np.zeros(7)
             rotation[1] = np.random.uniform() * 2 * np.pi
         elif rot_type in ['so3']: # rot is 'so3'
-            # print("rot type={}".format(rot_type))
+            print("mode={}, idx={}, rot type={}".format(mode, idx,rot_type))
             rotation = np.zeros(7)
             rotation[1] = np.random.uniform() * 2 * np.pi
             rotation[2] = np.random.uniform() * np.pi
@@ -113,13 +113,18 @@ def rotate_plane0_point_cloud(batch_data, mode, rot_type):
 
         shape_pc = batch_data[k, ...]
         rotated_shape_pc = shape_pc.reshape((-1, 7)) + rotation.reshape((-1,7))
+        # print('shape_pc={}, rotated_shape={}, azimutal={}, elevation={}'.format(shape_pc[0], rotated_shape_pc[0], rotated_shape_pc[0,1], rotated_shape_pc[0,2]))
 
-        from utils.data_prep_chordiogram import spherical2cartesian, cartesian2spherical
         x_aux, y_aux, z_aux = spherical2cartesian(rotated_shape_pc[:, 1], rotated_shape_pc[:, 2])
+        # print('x_aux={}, y_aux={}, z_aux={}'.format(x_aux[0], y_aux[0], z_aux[0]))
         _, phi, theta = cartesian2spherical(x_aux, y_aux, z_aux)
-        rotated_shape_pc[:, 1:3] = np.vstack((phi, theta)).T
+        # print('phi={}, theta={}'.format(phi[0], theta[0]))
+
+        rotated_shape_pc[:, 1:3] = np.vstack((phi.reshape(1,-1), theta.reshape(1,-1))).T
+        # print('rotated_pc={}'.format(rotated_shape_pc[0]))
 
         rotated_data[k, ...] = rotated_shape_pc
+
     return rotated_data
 
 
