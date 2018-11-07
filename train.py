@@ -277,12 +277,21 @@ def train_one_epoch(sess, ops, train_writer):
             # if TRAIN_TEST in ["z-z", "z-so3"]: train with azimuthal rotations else: train with so3
             if FLAGS.dataset in ["original"]:
                 rotated_data = provider.rotate_point_cloud(current_data[start_idx:end_idx, :, :], 'train', TRAIN_TEST)
+                jittered_data = provider.jitter_point_cloud(rotated_data)
             elif FLAGS.dataset in ["plane0"]:
                 rotated_data = provider.rotate_plane0_point_cloud(current_data[start_idx:end_idx, :, :], 'train', TRAIN_TEST)
+                jittered_data = provider.jitter_plane0(rotated_data)
             else:
                 rotated_data = current_data[start_idx:end_idx, :, :]
+                if FLAGS.dataset in ["plane1"]:
+                    jittered_data = provider.jitter_plane1(rotated_data)
+                elif FLAGS.dataset in ["plane2"]:
+                    jittered_data = provider.jitter_plane2(rotated_data)
+                else:
+                    jittered_data = provider.jitter_darboux(rotated_data)
+
                 
-            jittered_data = provider.jitter_point_cloud(rotated_data)
+            #jittered_data = provider.jitter_point_cloud(rotated_data)
             #jittered_data = current_data[start_idx:end_idx, :, :]
             feed_dict = {ops['pointclouds_pl']: jittered_data,
                          ops['labels_pl']: current_label[start_idx:end_idx],
