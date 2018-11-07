@@ -162,10 +162,12 @@ def jitter_point_cloud(batch_data, sigma=0.01, clip=0.05):
     jittered_data += batch_data
 
     for i in range(3):
-        x_aux, y_aux, z_aux = spherical2cartesian(jittered_data[:, 2*i + 1], jittered_data[:, 2*i + 2])
+        x_aux, y_aux, z_aux = spherical2cartesian(jittered_data[:, :, 2*i + 1], jittered_data[:, :, 2*i + 2])
         # print('x_aux={}, y_aux={}, z_aux={}'.format(x_aux[0], y_aux[0], z_aux[0]))
         _, phi, theta = cartesian2spherical(x_aux, y_aux, z_aux)
-        jittered_data[:, 2*i + 1:2*i + 2 + 1] = np.vstack((phi.reshape(1, -1), theta.reshape(1, -1))).T
+        #jittered_data[:, 2*i + 1:2*i + 2 + 1] = np.vstack((phi.reshape(1, -1), theta.reshape(1, -1))).T
+        jittered_data[:, :, 2 * i + 1] = phi
+        jittered_data[:, :, 2 * i + 2] = theta
 
     return jittered_data
 
