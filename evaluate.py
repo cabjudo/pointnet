@@ -180,7 +180,6 @@ def eval_one_epoch(sess, ops, num_votes=1, topk=1):
                 if FLAGS.dataset in ["original"]:
                     rotated_data = provider.rotate_point_cloud(current_data[start_idx:end_idx, :, :], 'test', TRAIN_TEST)
                 elif FLAGS.dataset in ["plane0"]:
-                    print("rotating")
                     rotated_data = provider.rotate_plane0_point_cloud(current_data[start_idx:end_idx, :, :], 'test', TRAIN_TEST)
                 else:
                     rotated_data = current_data[start_idx:end_idx, :, :]
