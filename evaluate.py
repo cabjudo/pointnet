@@ -92,7 +92,7 @@ DatasetPath = {
     "darboux": {
         "train": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/darboux/train_files.txt'),
         "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/darboux/test_files.txt'),
-        "num_chord_features": 5,
+        "num_chord_features": 4,
     },
 }
 
