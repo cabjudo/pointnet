@@ -100,11 +100,11 @@ def rotate_plane0_point_cloud(batch_data, mode, rot_type):
     for k in range(batch_data.shape[0]):
 
         if rot_type in ['z']:
-            print("mode={}, idx={}, rot type={}".format(mode, idx,rot_type))
+            #print("mode={}, idx={}, rot type={}".format(mode, idx,rot_type))
             rotation = np.zeros(7)
             rotation[1] = np.random.uniform() * 2 * np.pi
         elif rot_type in ['so3']: # rot is 'so3'
-            print("mode={}, idx={}, rot type={}".format(mode, idx,rot_type))
+            #print("mode={}, idx={}, rot type={}".format(mode, idx,rot_type))
             rotation = np.zeros(7)
             rotation[1] = np.random.uniform() * 2 * np.pi
             rotation[2] = np.random.uniform() * np.pi
