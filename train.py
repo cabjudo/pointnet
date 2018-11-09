@@ -94,6 +94,11 @@ DatasetPath = {
         "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/darboux/test_files.txt'),
         "num_chord_features": 4,
     },
+    "darboux_aug": {
+        "train": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/darboux_aug/train_files.txt'),
+        "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/darboux_aug/test_files.txt'),
+        "num_chord_features": 5,
+    },
 }
 
 DSET_INFO = DatasetPath[FLAGS.dataset]
