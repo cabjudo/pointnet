@@ -15,7 +15,7 @@ import provider
 import tf_util
 
 model_choices = ["pointnet_cls", "pointnet_cls_basic", "pointnet_no3trans", "pointnet_notrans"]
-dataset_choices = ["plane0", "plane1", "plane2", "original", "darboux"]
+dataset_choices = ["plane0", "plane1", "plane2", "original", "darboux", "darboux_aug"]
 train_test = ["z-z", "z-so3", "so3-so3"]
 
 parser = argparse.ArgumentParser()
