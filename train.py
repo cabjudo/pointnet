@@ -14,10 +14,21 @@ sys.path.append(os.path.join(BASE_DIR, 'utils'))
 import provider
 import tf_util
 
-model_choices = ["pointnet_cls", "pointnet_cls_basic", "pointnet_no3trans", "pointnet_notrans"]
+model_choices = ["pointnet_cls",
+                 "pointnet_cls_basic",
+                 "pointnet_no3trans",
+                 "pointnet_notrans",
+                 'pointnet_notrans_add1024',
+                 'pointnet_notrans_add2x1024',
+                 'pointnet_notrans_add128',
+                 'pointnet_notrans_add2x128',
+                 'pointnet_notrans_add3x128',
+                 'pointnet_notrans_add64',
+                 'pointnet_notrans_add2x64',
+                 'pointnet_notrans_add3x64']
+
 dataset_choices = ["plane0", "plane1", "plane2", "original", "darboux", "darboux_aug"]
 train_test = ["z-z", "z-so3", "so3-so3"]
-
 parser = argparse.ArgumentParser()
 parser.add_argument('--gpu', type=int, default=0, help='GPU to use [default: GPU 0]')
 parser.add_argument('--model', default='pointnet_cls', choices=model_choices, help='Model name: pointnet_cls or pointnet_cls_basic [default: pointnet_cls]')
@@ -94,7 +105,17 @@ DatasetPath = {
         "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/darboux/test_files.txt'),
         "num_chord_features": 4,
     },
+    "darboux_expand": {
+        "train": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/darboux/train_files.txt'),
+        "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/darboux/test_files.txt'),
+        "num_chord_features": 4,
+    },
     "darboux_aug": {
+        "train": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/darboux_aug/train_files.txt'),
+        "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/darboux_aug/test_files.txt'),
+        "num_chord_features": 5,
+    },
+    "darboux_expand_aug": {
         "train": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/darboux_aug/train_files.txt'),
         "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/darboux_aug/test_files.txt'),
         "num_chord_features": 5,
@@ -286,6 +307,9 @@ def train_one_epoch(sess, ops, train_writer):
             elif FLAGS.dataset in ["plane0"]:
                 rotated_data = provider.rotate_plane0_point_cloud(current_data[start_idx:end_idx, :, :], 'train', TRAIN_TEST)
                 jittered_data = provider.jitter_plane0(rotated_data)
+            elif FLAGS.dataset in ["darboux_expand"]:
+                rotated_data = provider.expand_darbox(current_data[start_idx:end_idx, :, :])
+                jittered_data = provider.jitter_darboux_expand(rotated_data)
             else:
                 rotated_data = current_data[start_idx:end_idx, :, :]
                 if FLAGS.dataset in ["plane1"]:
