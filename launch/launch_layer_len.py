@@ -3,22 +3,24 @@ import numpy as np
 import os
 import subprocess
 
-samples = 20
+samples = 1
 # for learning rates, 10^-5 --> 10^-2 choose random numbers between 2 and 5
 # np.random.rand returns values [0, 1)
-lr_exponent = 2 + np.random.rand(samples) * 3
+lr_exponent = 4 + np.random.rand(samples)
 lr = np.power(10, -lr_exponent)
 
-model_choices = ['pointnet_notrans_add1024',
-                 'pointnet_notrans_add2x1024',
-                 'pointnet_notrans_add128',
-                 'pointnet_notrans_add2x128',
-                 'pointnet_notrans_add3x128',
-                 'pointnet_notrans_add64',
-                 'pointnet_notrans_add2x64',
-                 'pointnet_notrans_add3x64']
+# model_choices = ['pointnet_notrans_add1024',
+#                  'pointnet_notrans_add2x1024',
+#                  'pointnet_notrans_add128',
+#                  'pointnet_notrans_add2x128',
+#                  'pointnet_notrans_add3x128',
+#                  'pointnet_notrans_add64',
+#                  'pointnet_notrans_add2x64',
+#                  'pointnet_notrans_add3x64']
 
-data_choices = ["plane0", "plane1", "plane2"]
+model_choices = ['pointnet_notrans_add2x1024']
+
+data_choices = ["plane0", "darboux", "darboux_expand"]
 
 for data in data_choices:
     for arch in model_choices:
@@ -47,6 +49,7 @@ for data in data_choices:
                     '--learning_rate={}'.format(l),
                     '--optimizer=adam',
                     '--batch_size=32',
+                    '--augment=True',
                     '--num_point=1024',
                     '--max_epoch=250',
                     '--momentum=0.9',

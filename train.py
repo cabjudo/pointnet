@@ -27,7 +27,7 @@ model_choices = ["pointnet_cls",
                  'pointnet_notrans_add2x64',
                  'pointnet_notrans_add3x64']
 
-dataset_choices = ["plane0", "plane1", "plane2", "original", "darboux", "darboux_aug"]
+dataset_choices = ["plane0", "plane1", "plane2", "original", "darboux", "darboux_aug", "darboux_expand"]
 train_test = ["z-z", "z-so3", "so3-so3"]
 parser = argparse.ArgumentParser()
 parser.add_argument('--gpu', type=int, default=0, help='GPU to use [default: GPU 0]')
@@ -44,6 +44,7 @@ parser.add_argument('--decay_step', type=int, default=200000, help='Decay step f
 parser.add_argument('--decay_rate', type=float, default=0.7, help='Decay rate for lr decay [default: 0.8]')
 parser.add_argument('--train_test', default="z-z", help='Train test setting: z-z]')
 parser.add_argument('--flip_train_test', default=False, help='Flips training and testing dataset')
+parser.add_argument('--augment', default=False, help='Augment the dataset')
 FLAGS = parser.parse_args()
 
 
@@ -122,6 +123,16 @@ DatasetPath = {
     },
 }
 
+if FLAGS.augment:
+    filepath_parts = DatasetPath[FLAGS.dataset]['train'].split('/')[:-1]
+    filepath_parts += ['train_files_aug_5.txt']
+    filepath = '/'.join(filepath_parts)
+else:    
+    filepath_parts = DatasetPath[FLAGS.dataset]['train'].split('/')[:-1]
+    filepath_parts += ['train_files_aug_1.txt']
+    filepath = '/'.join(filepath_parts)
+
+DatasetPath[FLAGS.dataset]['train'] = filepath
 DSET_INFO = DatasetPath[FLAGS.dataset]
 #TRAIN_FILES = provider.getDataFiles( \
 #    os.path.join(BASE_DIR, 'data/modelnet40_ply_hdf5_2048/train_files.txt'))
