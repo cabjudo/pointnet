@@ -297,12 +297,17 @@ def create_chordiogram_h5(file_num, classes, paths, output_path, sampling_method
     fnames = []
 
     for i, f in enumerate(paths):
-        print('{}: generatin file {}, with {}'.format(i, output_filename, f))
-        mesh = trimesh.load(f)
-        mesh.remove_degenerate_faces()
-        mesh.remove_duplicate_faces()
-        mesh.vertices -= mesh.centroid
-        mesh.vertices /= np.linalg.norm(mesh.vertices, axis=1).max()
+
+        try:
+            mesh = trimesh.load(f)
+            mesh.remove_degenerate_faces()
+            mesh.remove_duplicate_faces()
+            mesh.vertices -= mesh.centroid
+            mesh.vertices /= np.linalg.norm(mesh.vertices, axis=1).max()
+            print('{}: generatin file {}, with {}'.format(i, output_filename, f))
+        except:
+            print('Error processing: {}'.format(f))
+            continue
 
         chr = METHODS[chord_type]['function'](mesh, num_samples=num_samples, sampling_method=sampling_method,
                                               cluster=cluster)
