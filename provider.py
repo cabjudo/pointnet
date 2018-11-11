@@ -218,14 +218,19 @@ def jitter_plane2(batch_data, sigma=0.01, clip=0.05):
 def getDataFiles(list_filename):
     return [line.rstrip() for line in open(list_filename)]
 
-def load_h5(h5_filename):
+def load_h5(h5_filename, return_fnames=False):
     f = h5py.File(h5_filename, 'r')
     data = f['data'][:]
     label = f['label'][:]
-    return (data, label)
+    fnames = f['fnames'][:]
 
-def loadDataFile(filename):
-    return load_h5(filename)
+    if return_fnames:
+        return (data, label, fnames)
+    else:
+        return (data, label)
+
+def loadDataFile(filename, return_fnames=False):
+    return load_h5(filename, return_fnames)
 
 def load_h5_data_label_seg(h5_filename):
     f = h5py.File(h5_filename, 'r')
