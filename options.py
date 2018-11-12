@@ -176,19 +176,19 @@ def get_options():
     test_key = FLAGS.dataset + '_aug'
     if test_key in DatasetPath.keys():
         if FLAGS.augment:
-            filepath_parts = DatasetPath[FLAGS.dataset]['train'].split('/')[:-1]
+            filepath_parts = DatasetPath[FLAGS.dataset][FLAGS.representation]['train'].split('/')[:-1]
             filepath_parts += ['train_files_aug_5.txt']
             filepath = '/'.join(filepath_parts)
         else:    
-            filepath_parts = DatasetPath[FLAGS.dataset]['train'].split('/')[:-1]
+            filepath_parts = DatasetPath[FLAGS.dataset][FLAGS.representation]['train'].split('/')[:-1]
             filepath_parts += ['train_files_aug_1.txt']
             filepath = '/'.join(filepath_parts)
     else:
-        filepath = DatasetPath[FLAGS.dataset]['train']
+        filepath = DatasetPath[FLAGS.dataset][FLAGS.representation]['train']
 
     FLAGS.train_path = filepath
-    FLAGS.test_path = DatasetPath[FLAGS.dataset]['test']
-    FLAGS.num_chord_features = DatasetPath[FLAGS.dataset]['num_chord_features']
+    FLAGS.test_path = DatasetPath[FLAGS.dataset][FLAGS.representation]['test']
+    FLAGS.num_chord_features = DatasetPath[FLAGS.dataset][FLAGS.representation]['num_chord_features']
 
     # FLAGS.DatasetPath = DatasetPath
 
