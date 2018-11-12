@@ -61,7 +61,7 @@ def train():
             learning_rate = get_learning_rate(FLAGS, batch)
             tf.summary.scalar('learning_rate', learning_rate)
             if FLAGS.optimizer == 'momentum':
-                optimizer = tf.train.MomentumOptimizer(learning_rate, momentum=MOMENTUM)
+                optimizer = tf.train.MomentumOptimizer(learning_rate, momentum=FLAGS.momentum)
             elif FLAGS.optimizer == 'adam':
                 optimizer = tf.train.AdamOptimizer(learning_rate)
             train_op = optimizer.minimize(loss, global_step=batch)
@@ -180,8 +180,8 @@ def eval_one_epoch(sess, ops, test_writer):
     total_correct = 0
     total_seen = 0
     loss_sum = 0
-    total_seen_class = [0 for _ in range(NUM_CLASSES)]
-    total_correct_class = [0 for _ in range(NUM_CLASSES)]
+    total_seen_class = [0 for _ in range(FLAGS.num_classes)]
+    total_correct_class = [0 for _ in range(FLAGS.num_classes)]
 
     for fn in range(len(TEST_FILES)):
         log_string(FLAGS, '----' + str(fn) + '-----')
@@ -210,7 +210,7 @@ def eval_one_epoch(sess, ops, test_writer):
             correct = np.sum(pred_val == current_label[start_idx:end_idx])
             total_correct += correct
             total_seen += FLAGS.batch_size
-            loss_sum += (loss_val*BATCH_SIZE)
+            loss_sum += (loss_val*FLAGS.batch_size)
             for i in range(start_idx, end_idx):
                 l = current_label[i]
                 total_seen_class[l] += 1
