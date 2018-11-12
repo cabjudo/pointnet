@@ -128,17 +128,17 @@ def rotate_plane0_point_cloud(batch_data, mode, rot_type):
     return rotated_data
 
 
-def expand_darbox(batch_data):
+def expand_darboux(batch_data):
     '''
     Use cos and sin instead of just spherical coordinates to make 0 and 2pi close
     '''
     
-    rotated_data = np.zeros((batch_data.shape[0], 6), dtype=np.float32)
+    rotated_data = np.zeros((batch_data.shape[0], batch_data.shape[1], 6), dtype=np.float32)
     for k in range(batch_data.shape[0]):
         shape_pc = batch_data[k, ...]
-        rotated_data[k, :, 0:2] = rotated_shape_pc[:, 0:2]
-        rotated_data[k, :, 2:4] = np.cos(rotated_shape_pc[:, 2]), np.sin(rotated_shape_pc[:, 2])
-        rotated_data[k, :, 4:6] = np.cos(rotated_shape_pc[:, 3]), np.sin(rotated_shape_pc[:, 3])
+        rotated_data[k, :, 0:2] = shape_pc[:, 0:2]
+        rotated_data[k, :, 2:4] = np.array([np.cos(shape_pc[:, 2]), np.sin(shape_pc[:, 2])]).T
+        rotated_data[k, :, 4:6] = np.array([np.cos(shape_pc[:, 3]), np.sin(shape_pc[:, 3])]).T
 
     return rotated_data
 
@@ -234,21 +234,21 @@ def jitter_expand_darboux(batch_data, sigma=0.01, clip=0.05):
     assert(clip > 0)
     jittered_data_darboux = np.clip(sigma * np.random.randn(B, N, C), -1*clip, clip)
     # interpret jitter as angle
-    jittered_data = np.zeros((batch_data.shape[0], 6), dtype=np.float32)
-    jittered_data[k, :, 0:2] = jittered_data_darboux[:, 0:2]
-    jittered_data[k, :, 2:4] = np.cos(jittered_data_darboux[:, 2]), np.sin(jittered_data_darboux[:, 2])
-    jittered_data[k, :, 4:6] = np.cos(jittered_data_darboux[:, 3]), np.sin(jittered_data_darboux[:, 3])
+    jittered_data = np.zeros((batch_data.shape[0], batch_data.shape[1],  6), dtype=np.float32)
+    jittered_data[:, :, 0:2] = jittered_data_darboux[:, :, 0:2]
+    jittered_data[:, :, 2:4] = np.array([np.cos(jittered_data_darboux[:, :, 2]).T, np.sin(jittered_data_darboux[:, :, 2]).T]).T
+    jittered_data[:, :, 4:6] = np.array([np.cos(jittered_data_darboux[:, :, 3]).T, np.sin(jittered_data_darboux[:, :, 3]).T]).T
 
-    jittered_data[k, :, 0] += batch_data[k, :, 0]
-    jittered_data[k, :, 1] += np.cos(np.arccos(jittered_data[k, :, 1]) + np.arccos(batch_data[k, :, 1]))
+    jittered_data[:, :, 0] += batch_data[:, :, 0]
+    jittered_data[:, :, 1] += np.cos(np.arccos(jittered_data[:, :, 1]) + np.arccos(batch_data[:, :, 1]))
     # cos(alpha + beta) = cos(alpha)cos(beta) - sin(alpha)sin(beta)
-    jittered_data[k, :, 2] = jittered_data[k, :, 2]*batch_data[k, :, 2] - jittered_data[k, :, 3]*batch_data[k, :, 3]
+    jittered_data[:, :, 2] = jittered_data[:, :, 2]*batch_data[:, :, 2] - jittered_data[:, :, 3]*batch_data[:, :, 3]
     # sin(alpha + beta) = sin(alpha) cos(beta) + cos(alpha) sin(beta)
-    jittered_data[k, :, 3] = jittered_data[k, :, 3]*batch_data[k, :, 2] + jittered_data[k, :, 2]*batch_data[k, :, 3]
+    jittered_data[:, :, 3] = jittered_data[:, :, 3]*batch_data[:, :, 2] + jittered_data[:, :, 2]*batch_data[:, :, 3]
     # cos(alpha + beta) = cos(alpha)cos(beta) - sin(alpha)sin(beta)
-    jittered_data[k, :, 4] = jittered_data[k, :, 4]*batch_data[k, :, 4] - jittered_data[k, :, 5]*batch_data[k, :, 5]
+    jittered_data[:, :, 4] = jittered_data[:, :, 4]*batch_data[:, :, 4] - jittered_data[:, :, 5]*batch_data[:, :, 5]
     # sin(alpha + beta) = sin(alpha) cos(beta) + cos(alpha) sin(beta)
-    jittered_data[k, :, 5] = jittered_data[k, :, 5]*batch_data[k, :, 4] + jittered_data[k, :, 4]*batch_data[k, :, 5]
+    jittered_data[:, :, 5] = jittered_data[:, :, 5]*batch_data[:, :, 4] + jittered_data[:, :, 4]*batch_data[:, :, 5]
 
     return jittered_data
 
