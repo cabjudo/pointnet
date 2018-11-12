@@ -1,0 +1,102 @@
+/NAS/data/diego/logs/chordiogram/save/save-plane0-notrans-lr-2-7664e-04-rot-z-so3-npoints-1024/model.ckpt-78387 pointnet_notrans plane0 z-so3
+Model restored.
+----0----
+(2048, 1024, 7)
+2048
+----1----
+(420, 1024, 7)
+420
+eval mean loss: 5.061405
+eval accuracy: 0.347808
+eval avg class acc: 0.337600
+  airplane:	0.420	100
+   bathtub:	0.280	50
+       bed:	0.388	98
+     bench:	0.250	20
+ bookshelf:	0.490	100
+    bottle:	0.404	99
+      bowl:	0.250	20
+       car:	0.260	100
+     chair:	0.310	100
+      cone:	0.500	20
+       cup:	0.100	20
+   curtain:	0.150	20
+      desk:	0.233	86
+      door:	0.600	20
+   dresser:	0.558	86
+flower_pot:	0.200	20
+ glass_box:	0.320	100
+    guitar:	0.610	100
+  keyboard:	0.350	20
+      lamp:	0.750	20
+    laptop:	0.150	20
+    mantel:	0.190	100
+   monitor:	0.470	100
+night_stand:	0.488	86
+    person:	0.550	20
+     piano:	0.210	100
+     plant:	0.560	100
+     radio:	0.300	20
+range_hood:	0.300	100
+      sink:	0.150	20
+      sofa:	0.170	100
+    stairs:	0.350	20
+     stool:	0.150	20
+     table:	0.250	100
+      tent:	0.500	20
+    toilet:	0.330	100
+  tv_stand:	0.200	100
+      vase:	0.313	99
+  wardrobe:	0.250	20
+      xbox:	0.200	20
+/NAS/data/diego/logs/chordiogram/save/save-plane0-notrans-lr-2-7664e-04-rot-z-so3-npoints-1024/model.ckpt-78387 pointnet_notrans plane0 z-so3
+Model restored.
+----0----
+(2048, 1024, 7)
+2048
+----1----
+(420, 1024, 7)
+420
+eval mean loss: 4.950552
+eval accuracy: 0.355114
+eval avg class acc: 0.343602
+  airplane:	0.460	100
+   bathtub:	0.160	50
+       bed:	0.418	98
+     bench:	0.250	20
+ bookshelf:	0.630	100
+    bottle:	0.394	99
+      bowl:	0.250	20
+       car:	0.230	100
+     chair:	0.310	100
+      cone:	0.400	20
+       cup:	0.150	20
+   curtain:	0.250	20
+      desk:	0.140	86
+      door:	0.600	20
+   dresser:	0.628	86
+flower_pot:	0.250	20
+ glass_box:	0.350	100
+    guitar:	0.500	100
+  keyboard:	0.450	20
+      lamp:	0.550	20
+    laptop:	0.450	20
+    mantel:	0.160	100
+   monitor:	0.470	100
+night_stand:	0.500	86
+    person:	0.550	20
+     piano:	0.160	100
+     plant:	0.610	100
+     radio:	0.150	20
+range_hood:	0.290	100
+      sink:	0.300	20
+      sofa:	0.250	100
+    stairs:	0.350	20
+     stool:	0.050	20
+     table:	0.220	100
+      tent:	0.400	20
+    toilet:	0.260	100
+  tv_stand:	0.270	100
+      vase:	0.434	99
+  wardrobe:	0.250	20
+      xbox:	0.250	20

@@ -1,0 +1,100 @@
+Model restored.
+----0----
+(2048, 1024, 4)
+2048
+----1----
+(420, 1024, 4)
+420
+eval mean loss: 0.883763
+eval accuracy: 0.748377
+eval avg class acc: 0.702845
+  airplane:	0.990	99
+   bathtub:	0.580	50
+       bed:	0.840	100
+     bench:	0.700	20
+ bookshelf:	0.697	99
+    bottle:	0.930	100
+      bowl:	0.750	20
+       car:	0.970	100
+     chair:	0.900	100
+      cone:	0.850	20
+       cup:	0.600	20
+   curtain:	0.800	20
+      desk:	0.600	85
+      door:	0.800	20
+   dresser:	0.442	86
+flower_pot:	0.150	20
+ glass_box:	0.920	100
+    guitar:	0.960	100
+  keyboard:	0.900	20
+      lamp:	0.600	20
+    laptop:	0.850	20
+    mantel:	0.840	100
+   monitor:	0.770	100
+night_stand:	0.337	86
+    person:	0.600	20
+     piano:	0.700	100
+     plant:	0.788	99
+     radio:	0.650	20
+range_hood:	0.770	100
+      sink:	0.550	20
+      sofa:	0.820	100
+    stairs:	0.600	20
+     stool:	0.400	20
+     table:	0.670	100
+      tent:	0.800	20
+    toilet:	0.950	100
+  tv_stand:	0.520	100
+      vase:	0.670	100
+  wardrobe:	0.300	20
+      xbox:	0.550	20
+Model restored.
+----0----
+(2048, 1024, 4)
+2048
+----1----
+(420, 1024, 4)
+420
+eval mean loss: 0.912174
+eval accuracy: 0.751623
+eval avg class acc: 0.704007
+  airplane:	0.980	99
+   bathtub:	0.620	50
+       bed:	0.830	100
+     bench:	0.750	20
+ bookshelf:	0.737	99
+    bottle:	0.790	100
+      bowl:	0.700	20
+       car:	0.910	100
+     chair:	0.890	100
+      cone:	0.800	20
+       cup:	0.500	20
+   curtain:	0.950	20
+      desk:	0.671	85
+      door:	0.800	20
+   dresser:	0.419	86
+flower_pot:	0.200	20
+ glass_box:	0.920	100
+    guitar:	0.970	100
+  keyboard:	0.850	20
+      lamp:	0.600	20
+    laptop:	0.950	20
+    mantel:	0.890	100
+   monitor:	0.810	100
+night_stand:	0.477	86
+    person:	0.600	20
+     piano:	0.590	100
+     plant:	0.717	99
+     radio:	0.500	20
+range_hood:	0.800	100
+      sink:	0.600	20
+      sofa:	0.800	100
+    stairs:	0.650	20
+     stool:	0.250	20
+     table:	0.730	100
+      tent:	0.850	20
+    toilet:	0.970	100
+  tv_stand:	0.480	100
+      vase:	0.810	100
+  wardrobe:	0.200	20
+      xbox:	0.600	20

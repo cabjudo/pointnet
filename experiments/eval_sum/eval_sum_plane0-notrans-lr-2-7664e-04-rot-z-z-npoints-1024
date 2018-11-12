@@ -1,0 +1,51 @@
+/NAS/data/diego/logs/chordiogram/save/save-plane0-notrans-lr-2-7664e-04-rot-z-so3-npoints-1024/model.ckpt-78387 pointnet_notrans plane0 z-z
+Model restored.
+----0----
+(2048, 1024, 7)
+2048
+----1----
+(420, 1024, 7)
+420
+eval mean loss: 0.704965
+eval accuracy: 0.877029
+eval avg class acc: 0.839164
+  airplane:	1.000	100
+   bathtub:	0.880	50
+       bed:	1.000	98
+     bench:	0.800	20
+ bookshelf:	0.920	100
+    bottle:	0.949	99
+      bowl:	0.950	20
+       car:	1.000	100
+     chair:	0.930	100
+      cone:	0.900	20
+       cup:	0.600	20
+   curtain:	0.850	20
+      desk:	0.767	86
+      door:	0.850	20
+   dresser:	0.698	86
+flower_pot:	0.150	20
+ glass_box:	0.920	100
+    guitar:	1.000	100
+  keyboard:	0.950	20
+      lamp:	0.800	20
+    laptop:	1.000	20
+    mantel:	0.940	100
+   monitor:	0.960	100
+night_stand:	0.814	86
+    person:	0.950	20
+     piano:	0.850	100
+     plant:	0.770	100
+     radio:	0.800	20
+range_hood:	0.890	100
+      sink:	0.650	20
+      sofa:	0.930	100
+    stairs:	0.700	20
+     stool:	0.600	20
+     table:	0.800	100
+      tent:	0.950	20
+    toilet:	0.990	100
+  tv_stand:	0.810	100
+      vase:	0.798	99
+  wardrobe:	0.550	20
+      xbox:	0.900	20
