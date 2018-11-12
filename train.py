@@ -13,185 +13,70 @@ import options
 import provider
 from utils import tf_util
 
-# BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-# sys.path.append(BASE_DIR)
-# sys.path.append(os.path.join(BASE_DIR, 'models'))
-# sys.path.append(os.path.join(BASE_DIR, 'utils'))
 
-# model_choices = ["pointnet_cls",
-#                  "pointnet_cls_basic",
-#                  "pointnet_no3trans",
-#                  "pointnet_notrans",
-#                  'pointnet_notrans_add1024',
-#                  'pointnet_notrans_add2x1024',
-#                  'pointnet_notrans_add128',
-#                  'pointnet_notrans_add2x128',
-#                  'pointnet_notrans_add3x128',
-#                  'pointnet_notrans_add64',
-#                  'pointnet_notrans_add2x64',
-#                  'pointnet_notrans_add3x64']
-
-# dataset_choices = ["plane0", "plane1", "plane2", "original", "darboux", "darboux_aug", "darboux_expand",  "darboux_expand_aug"]
-# train_test = ["z-z", "z-so3", "so3-so3"]
-# parser = argparse.ArgumentParser()
-# parser.add_argument('--gpu', type=int, default=0, help='GPU to use [default: GPU 0]')
-# parser.add_argument('--model', default='pointnet_cls', choices=model_choices, help='Model name: pointnet_cls or pointnet_cls_basic [default: pointnet_cls]')
-# parser.add_argument('--dataset', default='plane1', choices=dataset_choices, help='Dataset: chordiogram representation [default: plane11]')
-# parser.add_argument('--log_dir', default='log', help='Log dir [default: log]')
-# parser.add_argument('--num_point', type=int, default=1024, help='Point Number [256/512/1024/2048] [default: 1024]')
-# parser.add_argument('--max_epoch', type=int, default=250, help='Epoch to run [default: 250]')
-# parser.add_argument('--batch_size', type=int, default=32, help='Batch Size during training [default: 32]')
-# parser.add_argument('--learning_rate', type=float, default=0.001, help='Initial learning rate [default: 0.001]')
-# parser.add_argument('--momentum', type=float, default=0.9, help='Initial learning rate [default: 0.9]')
-# parser.add_argument('--optimizer', default='adam', help='adam or momentum [default: adam]')
-# parser.add_argument('--decay_step', type=int, default=200000, help='Decay step for lr decay [default: 200000]')
-# parser.add_argument('--decay_rate', type=float, default=0.7, help='Decay rate for lr decay [default: 0.8]')
-# parser.add_argument('--train_test', default="z-z", help='Train test setting: z-z]')
-# parser.add_argument('--flip_train_test', default=False, help='Flips training and testing dataset')
-# parser.add_argument('--augment', default=False, help='Augment the dataset')
-# parser.add_argument('--save_freq', default=5, help='Save frequency in epochs')
-# FLAGS = parser.parse_args()
-
-
-# BATCH_SIZE = FLAGS.batch_size
-# NUM_POINT = FLAGS.num_point
-# MAX_EPOCH = FLAGS.max_epoch
-# BASE_LEARNING_RATE = FLAGS.learning_rate
-# GPU_INDEX = FLAGS.gpu
-# MOMENTUM = FLAGS.momentum
-# OPTIMIZER = FLAGS.optimizer
-# DECAY_STEP = FLAGS.decay_step
-# DECAY_RATE = FLAGS.decay_rate
-# TRAIN_TEST = FLAGS.train_test
-# FLIP_TRAIN_TEST = FLAGS.flip_train_test
-
-# MODEL = importlib.import_module(FLAGS.model) # import network module
-# MODEL_FILE = os.path.join(BASE_DIR, 'models', FLAGS.model+'.py')
-# LOG_DIR = FLAGS.log_dir
-# if not os.path.exists(LOG_DIR): os.mkdir(LOG_DIR)
-# os.system('cp %s %s' % (MODEL_FILE, LOG_DIR)) # bkp of model def
-# os.system('cp train.py %s' % (LOG_DIR)) # bkp of train procedure
-# LOG_FOUT = open(os.path.join(LOG_DIR, 'log_train.txt'), 'w')
-# LOG_FOUT.write(str(FLAGS)+'\n')
-
-# MAX_NUM_POINT = 2048
-# NUM_CLASSES = 40
-
-# BN_INIT_DECAY = 0.5
-# BN_DECAY_DECAY_RATE = 0.5
-# BN_DECAY_DECAY_STEP = float(DECAY_STEP)
-# BN_DECAY_CLIP = 0.99
-
-# HOSTNAME = socket.gethostname()
-
-#ModelNet40 official train/test split
 FLAGS = options.get_options()
-
-# DatasetPath = {
-#     "plane0": {
-#         "train": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane0/train_files.txt'),
-#         "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane0/test_files.txt'),
-#         "num_chord_features": 7,
-#     },
-#     "plane1": {
-#         "train": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane1/train_files.txt'),
-#         "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane1/test_files.txt'),
-#         "num_chord_features": 3,
-#     },
-#     "plane2": {
-#         "train": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane2/train_files.txt'),
-#         "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane2/test_files.txt'),
-#         "num_chord_features": 4,
-#     },
-#     "original": {
-#         "train": os.path.join(BASE_DIR, '/NAS/data/christine/modelnet40_ply_hdf5_2048/train_files.txt'),
-#         "test": os.path.join(BASE_DIR, '/NAS/data/christine/modelnet40_ply_hdf5_2048/test_files.txt'),
-#         "num_chord_features": 3,
-#     },
-#     "darboux": {
-#         "train": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/darboux/train_files.txt'),
-#         "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/darboux/test_files.txt'),
-#         "num_chord_features": 4,
-#     },
-#     "darboux_expand": {
-#         "train": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/darboux/train_files.txt'),
-#         "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/darboux/test_files.txt'),
-#         "num_chord_features": 6,
-#     },
-#     "darboux_aug": {
-#         "train": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/darboux_aug/train_files.txt'),
-#         "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/darboux_aug/test_files.txt'),
-#         "num_chord_features": 5,
-#     },
-#     "darboux_expand_aug": {
-#         "train": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/darboux_aug/train_files.txt'),
-#         "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/darboux_aug/test_files.txt'),
-#         "num_chord_features": 6,
-#     },
-# }
-
-# if FLAGS.augment:
-#     filepath_parts = DatasetPath[FLAGS.dataset]['train'].split('/')[:-1]
-#     filepath_parts += ['train_files_aug_5.txt']
-#     filepath = '/'.join(filepath_parts)
-# else:    
-#     filepath_parts = DatasetPath[FLAGS.dataset]['train'].split('/')[:-1]
-#     filepath_parts += ['train_files_aug_1.txt']
-#     filepath = '/'.join(filepath_parts)
-# 
-# DatasetPath[FLAGS.dataset]['train'] = filepath
-
-
-
-DSET_INFO = FLAGS.DatasetPath[FLAGS.dataset]
-#TRAIN_FILES = provider.getDataFiles( \
-#    os.path.join(BASE_DIR, 'data/modelnet40_ply_hdf5_2048/train_files.txt'))
-#TEST_FILES = provider.getDataFiles(\
-#    os.path.join(BASE_DIR, 'data/modelnet40_ply_hdf5_2048/test_files.txt'))
-TRAIN_FILES = provider.getDataFiles(DSET_INFO['train'])
-    # os.path.join(BASE_DIR, '../../data/chords_dataset/train_files_2_angles.txt'))
-
-TEST_FILES = provider.getDataFiles(DSET_INFO['test'])
-    # os.path.join(BASE_DIR, '../../data/chords_dataset/test_files_2_angles.txt'))
-
-exit()
+TRAIN_FILES = provider.getDataFiles(FLAGS.train_path)
+TEST_FILES = provider.getDataFiles(FLAGS.test_path)
 
 # Flips the training and testing datasets
-if FLIP_TRAIN_TEST:
-    AUX_FLIP = TRAIN_FILES
-    TRAIN_FILES = TEST_FILES
-    TEST_FILES = AUX_FLIP
+if FLAGS.flip_train_test:
+    AUX_FLIP = FLAGS.train_path
+    FLAGS.train_path = FLAGS.test_path
+    FLAGS.test_path = AUX_FLIP
 
 def log_string(out_str):
-    LOG_FOUT.write(out_str+'\n')
-    LOG_FOUT.flush()
+    FLAGS.log_file.write(out_str+'\n')
+    FLAGS.log_file.flush()
     print(out_str)
 
 
 def get_learning_rate(batch):
     learning_rate = tf.train.exponential_decay(
-                        BASE_LEARNING_RATE,  # Base learning rate.
-                        batch * BATCH_SIZE,  # Current index into the dataset.
-                        DECAY_STEP,          # Decay step.
-                        DECAY_RATE,          # Decay rate.
+                        FLAGS.learning_rate,  # Base learning rate.
+                        batch * FLAGS.batch_size,  # Current index into the dataset.
+                        FLAGS.decay_step,          # Decay step.
+                        FLAGS.decay_rate,          # Decay rate.
                         staircase=True)
     learning_rate = tf.maximum(learning_rate, 0.00001) # CLIP THE LEARNING RATE!
     return learning_rate
 
 def get_bn_decay(batch):
     bn_momentum = tf.train.exponential_decay(
-                      BN_INIT_DECAY,
-                      batch*BATCH_SIZE,
-                      BN_DECAY_DECAY_STEP,
-                      BN_DECAY_DECAY_RATE,
+                      FLAGS.bn_init_decay,
+                      batch*FLAGS.batch_size,
+                      FLAGS.bn_decay_decay_step,
+                      FLAGS.bn_decay_decay_rate,
                       staircase=True)
-    bn_decay = tf.minimum(BN_DECAY_CLIP, 1 - bn_momentum)
+    bn_decay = tf.minimum(FLAGS.bn_decay_clip, 1 - bn_momentum)
     return bn_decay
+
+
+def purturb_data(FLAGS, data, mode='train'):
+    if FLAGS.dataset in ["original"]:
+        rotated_data = provider.rotate_point_cloud(data, mode, FLAGS.train_test)
+        jittered_data = provider.jitter_point_cloud(rotated_data)
+    elif FLAGS.dataset in ["plane0"]:
+        rotated_data = provider.rotate_plane0_point_cloud(data, mode, FLAGS.train_test)
+        jittered_data = provider.jitter_plane0(rotated_data)
+    elif FLAGS.dataset in ["darboux_expand"]:
+        rotated_data = provider.expand_darboux(data)
+        jittered_data = provider.jitter_expand_darboux(rotated_data)
+    else:
+        rotated_data = data
+        if FLAGS.dataset in ["plane1"]:
+            jittered_data = provider.jitter_plane1(rotated_data)
+        elif FLAGS.dataset in ["plane2"]:
+            jittered_data = provider.jitter_plane2(rotated_data)
+        else:
+            jittered_data = provider.jitter_darboux(rotated_data)
+
+    return rotated_data, jittered_data
+
 
 def train():
     with tf.Graph().as_default():
-        with tf.device('/gpu:'+str(GPU_INDEX)):
-            pointclouds_pl, labels_pl = MODEL.placeholder_inputs(BATCH_SIZE, NUM_POINT, DSET_INFO['num_chord_features'])
+        with tf.device('/gpu:'+str(FLAGS.gpu)):
+            pointclouds_pl, labels_pl = FLAGS.model.placeholder_inputs(FLAGS.batch_size, FLAGS.num_point, FLAGS.num_chord_features)
             is_training_pl = tf.placeholder(tf.bool, shape=())
             print(is_training_pl)
 
@@ -205,21 +90,21 @@ def train():
             tf.summary.scalar('bn_decay', bn_decay)
 
             # Get model and loss 
-            pred, end_points = MODEL.get_model(pointclouds_pl, is_training_pl, bn_decay=bn_decay,
-                                               input_dims=DSET_INFO['num_chord_features'])
-            loss = MODEL.get_loss(pred, labels_pl, end_points)
+            pred, end_points = FLAGS.model.get_model(pointclouds_pl, is_training_pl, bn_decay=bn_decay,
+                                               input_dims=FLAGS.num_chord_features)
+            loss = FLAGS.model.get_loss(pred, labels_pl, end_points)
             tf.summary.scalar('loss', loss)
 
             correct = tf.equal(tf.argmax(pred, 1), tf.to_int64(labels_pl))
-            accuracy = tf.reduce_sum(tf.cast(correct, tf.float32)) / float(BATCH_SIZE)
+            accuracy = tf.reduce_sum(tf.cast(correct, tf.float32)) / float(FLAGS.batch_size)
             tf.summary.scalar('accuracy', accuracy)
 
             # Get training operator
             learning_rate = get_learning_rate(batch)
             tf.summary.scalar('learning_rate', learning_rate)
-            if OPTIMIZER == 'momentum':
+            if FLAGS.optimizer == 'momentum':
                 optimizer = tf.train.MomentumOptimizer(learning_rate, momentum=MOMENTUM)
-            elif OPTIMIZER == 'adam':
+            elif FLAGS.optimizer == 'adam':
                 optimizer = tf.train.AdamOptimizer(learning_rate)
             train_op = optimizer.minimize(loss, global_step=batch)
 
@@ -227,27 +112,17 @@ def train():
             saver = tf.train.Saver()
 
         # Create a session
-        config = tf.ConfigProto()
-        config.gpu_options.allow_growth = True
-        config.allow_soft_placement = True
-        config.log_device_placement = False
+        config = FLAGS.config
         sess = tf.Session(config=config)
 
-        # if a checkpoint exists, restore from the latest checkpoint
-        #ckpt = tf.train.get_checkpoint_state(LOG_DIR)
-        #if ckpt and ckpt.model_checkpoint_path:
-        #saver.restore(sess, os.path.join(LOG_DIR, "model.ckpt"))
-
         # Add summary writers
-        #merged = tf.merge_all_summaries()
         merged = tf.summary.merge_all()
-        train_writer = tf.summary.FileWriter(os.path.join(LOG_DIR, 'train'),
-                                  sess.graph)
-        test_writer = tf.summary.FileWriter(os.path.join(LOG_DIR, 'test'))
+        train_writer = tf.summary.FileWriter(os.path.join(FLAGS.log_dir, 'train'), sess.graph)
+        test_writer = tf.summary.FileWriter(os.path.join(FLAGS.log_dir, 'test'))
 
         # Init variables
         # if a checkpoint exists, restore from the latest checkpoint
-        ckpt = tf.train.get_checkpoint_state(LOG_DIR)
+        ckpt = tf.train.get_checkpoint_state(FLAGS.log_dir)
         if ckpt and ckpt.model_checkpoint_path:
             saver.restore(sess, ckpt.model_checkpoint_path)
         else:
@@ -275,7 +150,7 @@ def train():
 
         assert sess.run(epoch_counter) < 250, 'Training is complete.'
 
-        for epoch in range(sess.run(epoch_counter), MAX_EPOCH + 1):
+        for epoch in range(sess.run(epoch_counter), FLAGS.max_epoch + 1):
             log_string('**** EPOCH %03d ****' % (epoch))
             sys.stdout.flush()
 
@@ -286,7 +161,7 @@ def train():
 
             # Save the variables to disk.
             if epoch % FLAGS.save_freq == 0:
-                save_path = saver.save(sess, os.path.join(LOG_DIR, "model.ckpt"), global_step=batch)
+                save_path = saver.save(sess, os.path.join(FLAGS.log_dir, "model.ckpt"), global_step=batch)
                 log_string("Model saved in file: %s" % save_path)
 
 
@@ -306,55 +181,36 @@ def train_one_epoch(sess, ops, train_writer):
     for fn in range(len(TRAIN_FILES)):
         log_string('----' + str(fn) + '-----')
         current_data, current_label = provider.loadDataFile(TRAIN_FILES[train_file_idxs[fn]])
-        current_data = current_data[:,0:NUM_POINT,:]
+        current_data = current_data[:,0:FLAGS.num_point,:]
         current_data, current_label, _ = provider.shuffle_data(current_data, np.squeeze(current_label))
         current_label = np.squeeze(current_label)
 
         file_size = current_data.shape[0]
-        num_batches = file_size // BATCH_SIZE
+        num_batches = file_size // FLAGS.batch_size
 
         total_correct = 0
         total_seen = 0
         loss_sum = 0
 
         for batch_idx in range(num_batches):
-            start_idx = batch_idx * BATCH_SIZE
-            end_idx = (batch_idx+1) * BATCH_SIZE
+            start_idx = batch_idx * FLAGS.batch_size
+            end_idx = (batch_idx+1) * FLAGS.batch_size
 
             # Augment batched point clouds by rotation and jittering
             # rotation depends on dataset and train/test type
-            # if TRAIN_TEST in ["z-z", "z-so3"]: train with azimuthal rotations else: train with so3
-            if FLAGS.dataset in ["original"]:
-                rotated_data = provider.rotate_point_cloud(current_data[start_idx:end_idx, :, :], 'train', TRAIN_TEST)
-                jittered_data = provider.jitter_point_cloud(rotated_data)
-            elif FLAGS.dataset in ["plane0"]:
-                rotated_data = provider.rotate_plane0_point_cloud(current_data[start_idx:end_idx, :, :], 'train', TRAIN_TEST)
-                jittered_data = provider.jitter_plane0(rotated_data)
-            elif FLAGS.dataset in ["darboux_expand"]:
-                rotated_data = provider.expand_darboux(current_data[start_idx:end_idx, :, :])
-                jittered_data = provider.jitter_expand_darboux(rotated_data)
-            else:
-                rotated_data = current_data[start_idx:end_idx, :, :]
-                if FLAGS.dataset in ["plane1"]:
-                    jittered_data = provider.jitter_plane1(rotated_data)
-                elif FLAGS.dataset in ["plane2"]:
-                    jittered_data = provider.jitter_plane2(rotated_data)
-                else:
-                    jittered_data = provider.jitter_darboux(rotated_data)
+            rotated_data, jittered_data = purturb_data(FLAGS, current_data[start_idx:end_idx, :, :], 'train')
 
-                
-            #jittered_data = provider.jitter_point_cloud(rotated_data)
-            #jittered_data = current_data[start_idx:end_idx, :, :]
             feed_dict = {ops['pointclouds_pl']: jittered_data,
                          ops['labels_pl']: current_label[start_idx:end_idx],
                          ops['is_training_pl']: is_training,}
-            summary, step, _, loss_val, pred_val = sess.run([ops['merged'], ops['step'],
-                ops['train_op'], ops['loss'], ops['pred']], feed_dict=feed_dict)
+
+            summary, step, _, loss_val, pred_val = sess.run([ops['merged'], ops['step'], ops['train_op'], ops['loss'], ops['pred']], feed_dict=feed_dict)
             train_writer.add_summary(summary, step)
+
             pred_val = np.argmax(pred_val, 1)
             correct = np.sum(pred_val == current_label[start_idx:end_idx])
             total_correct += correct
-            total_seen += BATCH_SIZE
+            total_seen += FLAGS.batch_size
             loss_sum += loss_val
 
         log_string('mean loss: %f' % (loss_sum / float(num_batches)))
@@ -373,38 +229,30 @@ def eval_one_epoch(sess, ops, test_writer):
     for fn in range(len(TEST_FILES)):
         log_string('----' + str(fn) + '-----')
         current_data, current_label = provider.loadDataFile(TEST_FILES[fn])
-        current_data = current_data[:,0:NUM_POINT,:]
+        current_data = current_data[:,0:FLAGS.num_point,:]
         current_label = np.squeeze(current_label)
 
         file_size = current_data.shape[0]
-        num_batches = file_size // BATCH_SIZE
+        num_batches = file_size // FLAGS.batch_size
 
         for batch_idx in range(num_batches):
-            start_idx = batch_idx * BATCH_SIZE
-            end_idx = (batch_idx+1) * BATCH_SIZE
+            start_idx = batch_idx * FLAGS.batch_size
+            end_idx = (batch_idx+1) * FLAGS.batch_size
 
             # Augment batched point clouds by rotation and jittering
-            # rotation depends on dataset and train/test type
-            # if TRAIN_TEST in ["so3-so3", "z-so3"]: test with arbitrary rotations else: test with z
-            if FLAGS.dataset in ["original"]:
-                rotated_data = provider.rotate_point_cloud(current_data[start_idx:end_idx, :, :], 'test', TRAIN_TEST)
-            elif FLAGS.dataset in ["plane0"]:
-                rotated_data = provider.rotate_plane0_point_cloud(current_data[start_idx:end_idx, :, :], 'test', TRAIN_TEST)
-            elif FLAGS.dataset in ["darboux_expand"]:
-                rotated_data = provider.expand_darboux(current_data[start_idx:end_idx, :, :])
-            else:
-                rotated_data = current_data[start_idx:end_idx, :, :]
-
+            rotated_data, _ = purturb_data(FLAGS, current_data[start_idx:end_idx, :, :], 'test')
+            
             feed_dict = {ops['pointclouds_pl']: rotated_data,
                          ops['labels_pl']: current_label[start_idx:end_idx],
                          ops['is_training_pl']: is_training}
-            summary, step, loss_val, pred_val = sess.run([ops['merged'], ops['step'],
-                ops['loss'], ops['pred']], feed_dict=feed_dict)
+
+            summary, step, loss_val, pred_val = sess.run([ops['merged'], ops['step'], ops['loss'], ops['pred']], feed_dict=feed_dict)
             test_writer.add_summary(summary, step)
+
             pred_val = np.argmax(pred_val, 1)
             correct = np.sum(pred_val == current_label[start_idx:end_idx])
             total_correct += correct
-            total_seen += BATCH_SIZE
+            total_seen += FLAGS.batch_size
             loss_sum += (loss_val*BATCH_SIZE)
             for i in range(start_idx, end_idx):
                 l = current_label[i]
@@ -420,4 +268,4 @@ def eval_one_epoch(sess, ops, test_writer):
 
 if __name__ == "__main__":
     train()
-    LOG_FOUT.close()
+    FLAGS.log_file.close()

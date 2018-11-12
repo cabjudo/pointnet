@@ -1,6 +1,7 @@
 import os
 import sys
 import argparse
+import importlib
 
 import tensorflow as tf
 
@@ -83,6 +84,21 @@ def setup():
     return base_dir
 
 
+def load(FLAGS):
+    # load model
+    FLAGS.model_file = os.path.join(FLAGS.basedir, 'models', FLAGS.model+'.py')
+    FLAGS.model = importlib.import_module(FLAGS.model) # import network module
+
+    # create log dir
+    if not os.path.exists(FLAGS.log_dir): os.mkdir(FLAGS.log_dir)
+    os.system('cp %s %s' % (FLAGS.model_file, FLAGS.log_dir)) # bkp of model def
+    os.system('cp train.py %s' % (FLAGS.log_dir)) # bkp of train procedure
+    FLAGS.log_file = open(os.path.join(FLAGS.log_dir, 'log_train.txt'), 'w')
+    FLAGS.log_file.write(str(FLAGS)+'\n')
+
+    return FLAGS
+
+
 def get_options():
     # get base directory
     basedir = setup()
@@ -127,8 +143,8 @@ def get_options():
     
     FLAGS = parser.parse_args()
 
+    # some hack to switch to the augmented dataset
     test_key = FLAGS.dataset + '_aug'
-    print(test_key, DatasetPath.keys())
     if test_key in DatasetPath.keys():
         if FLAGS.augment:
             filepath_parts = DatasetPath[FLAGS.dataset]['train'].split('/')[:-1]
@@ -138,10 +154,14 @@ def get_options():
             filepath_parts = DatasetPath[FLAGS.dataset]['train'].split('/')[:-1]
             filepath_parts += ['train_files_aug_1.txt']
             filepath = '/'.join(filepath_parts)
+    else:
+        filepath = DatasetPath[FLAGS.dataset]['train']
 
-        DatasetPath[FLAGS.dataset]['train'] = filepath
+    FLAGS.train_path = filepath
+    FLAGS.test_path = DatasetPath[FLAGS.dataset]['test']
+    FLAGS.num_chord_features = DatasetPath[FLAGS.dataset]['num_chord_features']
 
-    FLAGS.DatasetPath = DatasetPath
+    # FLAGS.DatasetPath = DatasetPath
 
     # add base directory to flags
     FLAGS.basedir = basedir
@@ -162,22 +182,8 @@ def get_options():
 
     FLAGS.config = config
 
-    
-
-
-
+    FLAGS = load(FLAGS)
 
     return FLAGS
 
 
-def load(FLAGS):
-    # load model
-    model = importlib.import_module(FLAGS.model) # import network module
-    FLAGS.model_file = os.path.join(FLAGS.basedir, 'models', FLAGS.model+'.py')
-
-    # create log dir
-    if not os.path.exists(FLAGS.log_dir): os.mkdir(FLAGS.log_dir)
-    os.system('cp %s %s' % (FLAGS.model_file, FLAGS.log_dir)) # bkp of model def
-    os.system('cp train.py %s' % (FLAGS.log_dir)) # bkp of train procedure
-    FLAGS.log_file = open(os.path.join(FLAGS.log_dir, 'log_train.txt'), 'w')
-    FLAGS.log_file.write(str(FLAGS)+'\n')
