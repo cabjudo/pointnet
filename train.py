@@ -49,7 +49,7 @@ def train():
 
             # Get model and loss 
             pred, end_points = FLAGS.model.get_model(pointclouds_pl, is_training_pl, bn_decay=bn_decay,
-                                               input_dims=FLAGS.num_chord_features)
+                                               input_dims=FLAGS.num_chord_features, num_classes=FLAGS.num_classes)
             loss = FLAGS.model.get_loss(pred, labels_pl, end_points)
             tf.summary.scalar('loss', loss)
 
