@@ -156,7 +156,7 @@ def get_options():
     parser.add_argument('--optimizer', default='adam', help='adam or momentum [default: adam]')
     parser.add_argument('--decay_step', type=int, default=200000, help='Decay step for lr decay [default: 200000]')
     parser.add_argument('--decay_rate', type=float, default=0.7, help='Decay rate for lr decay [default: 0.8]')
-    parser.add_argument('--num_classes', default=40, help='Num. of classes in the dataset')
+    parser.add_argument('--num_classes', default=40, help='Num. of classes in the dataset', type=int)
     
     # Test options
     parser.add_argument('--dump_dir', default='dump', help='dump folder path [dump]')
