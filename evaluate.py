@@ -15,7 +15,19 @@ import provider
 # import pc_util
 
 
-model_choices = ["pointnet_cls", "pointnet_cls_basic", "pointnet_no3trans", "pointnet_notrans"]
+model_choices = ["pointnet_cls",
+                 "pointnet_cls_basic",
+                 "pointnet_no3trans",
+                 "pointnet_notrans",
+                 'pointnet_notrans_add1024',
+                 'pointnet_notrans_add2x1024',
+                 'pointnet_notrans_add128',
+                 'pointnet_notrans_add2x128',
+                 'pointnet_notrans_add3x128',
+                 'pointnet_notrans_add64',
+                 'pointnet_notrans_add2x64',
+                 'pointnet_notrans_add3x64']
+# model_choices = ["pointnet_cls", "pointnet_cls_basic", "pointnet_no3trans", "pointnet_notrans"]
 dataset_choices = ["plane0", "plane1", "plane2", "original", "darboux", "darboux_aug"]
 train_test = ["z-z", "z-so3", "so3-so3"]
 
@@ -31,6 +43,7 @@ parser.add_argument('--train_test', default="z-z", help='Decay rate for lr decay
 parser.add_argument('--model_path', default='log/model.ckpt', help='model checkpoint file path [default: log/model.ckpt]')
 parser.add_argument('--dump_dir', default='dump', help='dump folder path [dump]')
 parser.add_argument('--visu', action='store_true', help='Whether to dump image for error case [default: False]')
+parser.add_argument('--augment', default=False, help='Augment the dataset')
 FLAGS = parser.parse_args()
 
 
@@ -99,7 +112,28 @@ DatasetPath = {
         "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/darboux_aug/test_files.txt'),
         "num_chord_features": 5,
     },
+    "darboux_expand": {
+        "train": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/darboux/train_files.txt'),
+        "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/darboux/test_files.txt'),
+        "num_chord_features": 6,
+    },
+    "darboux_expand_aug": {
+        "train": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/darboux_aug/train_files.txt'),
+        "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/darboux_aug/test_files.txt'),
+        "num_chord_features": 6,
+    }
 }
+
+if FLAGS.augment:
+    filepath_parts = DatasetPath[FLAGS.dataset]['train'].split('/')[:-1]
+    filepath_parts += ['train_files_aug_5.txt']
+    filepath = '/'.join(filepath_parts)
+else:    
+    filepath_parts = DatasetPath[FLAGS.dataset]['train'].split('/')[:-1]
+    filepath_parts += ['train_files_aug_1.txt']
+    filepath = '/'.join(filepath_parts)
+
+DatasetPath[FLAGS.dataset]['train'] = filepath
 
 DSET_INFO = DatasetPath[FLAGS.dataset]
 #TRAIN_FILES = provider.getDataFiles( \
@@ -186,6 +220,8 @@ def eval_one_epoch(sess, ops, num_votes=1, topk=1):
                     rotated_data = provider.rotate_point_cloud(current_data[start_idx:end_idx, :, :], 'test', TRAIN_TEST)
                 elif FLAGS.dataset in ["plane0"]:
                     rotated_data = provider.rotate_plane0_point_cloud(current_data[start_idx:end_idx, :, :], 'test', TRAIN_TEST)
+                elif FLAGS.dataset in ["darboux_expand"]:
+                    rotated_data = provider.expand_darboux(current_data[start_idx:end_idx, :, :])
                 else:
                     rotated_data = current_data[start_idx:end_idx, :, :]
 
