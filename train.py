@@ -27,7 +27,7 @@ model_choices = ["pointnet_cls",
                  'pointnet_notrans_add2x64',
                  'pointnet_notrans_add3x64']
 
-dataset_choices = ["plane0", "plane1", "plane2", "original", "darboux", "darboux_aug", "darboux_expand"]
+dataset_choices = ["plane0", "plane1", "plane2", "original", "darboux", "darboux_aug", "darboux_expand",  "darboux_expand_aug"]
 train_test = ["z-z", "z-so3", "so3-so3"]
 parser = argparse.ArgumentParser()
 parser.add_argument('--gpu', type=int, default=0, help='GPU to use [default: GPU 0]')
@@ -120,7 +120,7 @@ DatasetPath = {
     "darboux_expand_aug": {
         "train": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/darboux_aug/train_files.txt'),
         "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/darboux_aug/test_files.txt'),
-        "num_chord_features": 5,
+        "num_chord_features": 6,
     },
 }
 
