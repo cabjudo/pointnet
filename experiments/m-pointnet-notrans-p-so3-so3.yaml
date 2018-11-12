@@ -1,0 +1,89 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: m-pointnet-notrans-p-so3-so3
+spec:
+  backoffLimit: 5
+  completions: 1
+  template:
+    metadata:
+      labels:
+        app: m-pointnet-notrans-p-so3-so3
+      name: m-pointnet-notrans-p-so3-so3
+    spec:
+       affinity: {
+           nodeAffinity: {
+             requiredDuringSchedulingIgnoredDuringExecution: {
+               nodeSelectorTerms: [
+                 {
+                   matchExpressions: [
+                     {
+                       "key": "nvidia-gpu-name",
+                       "operator": "In",
+                       "values": ["GeForce-GTX-1080-Ti","GeForce-GTX-TITAN-X"]
+                     }
+                   ]
+                 }
+               ]
+             }
+           }
+         }
+       restartPolicy: Never
+       securityContext:
+           runAsUser: 1000025
+           # runAsUser: 1000006
+           fsGroup: 1000001
+       volumes:
+       - name: shared-datasets
+         persistentVolumeClaim:
+             claimName: datasets
+       - name: user-home
+         persistentVolumeClaim:
+             claimName: home
+       - name: user-arx
+         persistentVolumeClaim:
+             claimName: archive
+       containers:
+       - name: m-pointnet-notrans-p-so3-so3
+         image: chaneyk/tensorflow:v1.10.0-py3
+         imagePullPolicy: IfNotPresent
+         workingDir: /NAS/home/projects/pointnet
+         command: ["python3" , "train.py" , "--log_dir=save/save-m-pointnet-notrans-p-so3-so3" , "--representation=plane0" , "--model=pointnet_notrans_add3x128" , "--train_test=so3-so3" , "--dataset=modelnet40" , "--optimizer=adam" , "--batch_size=32" , "--num_point=1024" , "--max_epoch=150" , "--momentum=0.9" , "--decay_step=200000" , "--decay_rate=0.8" ]
+         env:
+         - name: HOME
+           value: "/NAS/home"
+         - name: PYTHONUNBUFFERED
+           value: "0"
+         resources:
+           requests:
+             cpu: 3.9
+             memory: 10
+           limits:
+             cpu: 12
+             memory: 32Gi
+             nvidia.com/gpu: 1
+         livenessProbe:
+           exec:
+             command:
+             - 'false'
+           initialDelaySeconds: 3900
+           periodSeconds: 1
+         volumeMounts:
+         - name: user-home
+           mountPath: /NAS/home
+         - name: shared-datasets
+           mountPath: /NAS/data
+         - name: user-arx
+           mountPath: /NAS/archive
+       dnsPolicy: "None"
+       dnsConfig:
+         nameservers:
+           - 8.8.8.8
+           - 8.8.4.4
+         searches:
+           - cis.upenn.edu
+           - seas.upenn.edu
+         options:
+           - name: ndots
+             value: "5"
+           - name: edns0
