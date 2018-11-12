@@ -128,6 +128,20 @@ def rotate_plane0_point_cloud(batch_data, mode, rot_type):
     return rotated_data
 
 
+def expand_darboux(batch_data):
+    '''
+    Use cos and sin instead of just spherical coordinates to make 0 and 2pi close
+    '''
+    
+    rotated_data = np.zeros((batch_data.shape[0], batch_data.shape[1], 6), dtype=np.float32)
+    for k in range(batch_data.shape[0]):
+        shape_pc = batch_data[k, ...]
+        rotated_data[k, :, 0:2] = shape_pc[:, 0:2]
+        rotated_data[k, :, 2:4] = np.array([np.cos(shape_pc[:, 2]), np.sin(shape_pc[:, 2])]).T
+        rotated_data[k, :, 4:6] = np.array([np.cos(shape_pc[:, 3]), np.sin(shape_pc[:, 3])]).T
+
+    return rotated_data
+
 
 def rotate_point_cloud_by_angle(batch_data, rotation_angle):
     """ Rotate the point cloud along up direction with certain angle.
@@ -203,6 +217,35 @@ def jitter_darboux(batch_data, sigma=0.01, clip=0.05):
     _, phi, theta = cartesian2spherical(x_aux, y_aux, z_aux)
     jittered_data[:, :, 2] = phi
     jittered_data[:, :, 3] = theta
+
+    return jittered_data
+
+
+def jitter_expand_darboux(batch_data, sigma=0.01, clip=0.05):
+    """ Randomly jitter chords in the plane0 representation. jittering is per point.
+        Input:
+          BxNx3 array, original batch of chords
+        Return:
+          BxNx3 array, jittered batch of chords
+    """
+    B, N, C = batch_data.shape
+    C -= 2 # to get darboux (not expand) length in the next step
+
+    assert(clip > 0)
+    # jittered_data_darboux = np.clip(sigma * np.random.randn(B, N, C), -1*clip, clip)
+    jittered_darboux = np.clip(sigma * np.random.randn(B, N, C), -1*clip, clip)
+    jittered_data = expand_darboux(jittered_darboux)
+    # interpret jitter as angle
+    jittered_data[:, :, 0] += batch_data[:, :, 0]
+    jittered_data[:, :, 1] = np.cos(np.arccos(jittered_data[:, :, 1]) + np.arccos(batch_data[:, :, 1]))
+    # cos(alpha + beta) = cos(alpha)cos(beta) - sin(alpha)sin(beta)
+    jittered_data[:, :, 2] = jittered_data[:, :, 2]*batch_data[:, :, 2] - jittered_data[:, :, 3]*batch_data[:, :, 3]
+    # sin(alpha + beta) = sin(alpha) cos(beta) + cos(alpha) sin(beta)
+    jittered_data[:, :, 3] = jittered_data[:, :, 3]*batch_data[:, :, 2] + jittered_data[:, :, 2]*batch_data[:, :, 3]
+    # cos(alpha + beta) = cos(alpha)cos(beta) - sin(alpha)sin(beta)
+    jittered_data[:, :, 4] = jittered_data[:, :, 4]*batch_data[:, :, 4] - jittered_data[:, :, 5]*batch_data[:, :, 5]
+    # sin(alpha + beta) = sin(alpha) cos(beta) + cos(alpha) sin(beta)
+    jittered_data[:, :, 5] = jittered_data[:, :, 5]*batch_data[:, :, 4] + jittered_data[:, :, 4]*batch_data[:, :, 5]
 
     return jittered_data
 
