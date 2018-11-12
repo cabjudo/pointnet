@@ -127,16 +127,19 @@ def get_options():
     
     FLAGS = parser.parse_args()
 
-    if FLAGS.augment:
-        filepath_parts = DatasetPath[FLAGS.dataset]['train'].split('/')[:-1]
-        filepath_parts += ['train_files_aug_5.txt']
-        filepath = '/'.join(filepath_parts)
-    else:    
-        filepath_parts = DatasetPath[FLAGS.dataset]['train'].split('/')[:-1]
-        filepath_parts += ['train_files_aug_1.txt']
-        filepath = '/'.join(filepath_parts)
+    test_key = FLAGS.dataset + '_aug'
+    print(test_key, DatasetPath.keys())
+    if test_key in DatasetPath.keys():
+        if FLAGS.augment:
+            filepath_parts = DatasetPath[FLAGS.dataset]['train'].split('/')[:-1]
+            filepath_parts += ['train_files_aug_5.txt']
+            filepath = '/'.join(filepath_parts)
+        else:    
+            filepath_parts = DatasetPath[FLAGS.dataset]['train'].split('/')[:-1]
+            filepath_parts += ['train_files_aug_1.txt']
+            filepath = '/'.join(filepath_parts)
 
-    DatasetPath[FLAGS.dataset]['train'] = filepath
+        DatasetPath[FLAGS.dataset]['train'] = filepath
 
     FLAGS.DatasetPath = DatasetPath
 

@@ -1,140 +1,149 @@
+import os
+import sys
 import argparse
 import math
 import h5py
-import numpy as np
-import tensorflow as tf
 import socket
 import importlib
-import os
-import sys
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(BASE_DIR)
-sys.path.append(os.path.join(BASE_DIR, 'models'))
-sys.path.append(os.path.join(BASE_DIR, 'utils'))
+
+import numpy as np
+import tensorflow as tf
+
+import options
 import provider
-import tf_util
+from utils import tf_util
 
-model_choices = ["pointnet_cls",
-                 "pointnet_cls_basic",
-                 "pointnet_no3trans",
-                 "pointnet_notrans",
-                 'pointnet_notrans_add1024',
-                 'pointnet_notrans_add2x1024',
-                 'pointnet_notrans_add128',
-                 'pointnet_notrans_add2x128',
-                 'pointnet_notrans_add3x128',
-                 'pointnet_notrans_add64',
-                 'pointnet_notrans_add2x64',
-                 'pointnet_notrans_add3x64']
+# BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# sys.path.append(BASE_DIR)
+# sys.path.append(os.path.join(BASE_DIR, 'models'))
+# sys.path.append(os.path.join(BASE_DIR, 'utils'))
 
-dataset_choices = ["plane0", "plane1", "plane2", "original", "darboux", "darboux_aug", "darboux_expand",  "darboux_expand_aug"]
-train_test = ["z-z", "z-so3", "so3-so3"]
-parser = argparse.ArgumentParser()
-parser.add_argument('--gpu', type=int, default=0, help='GPU to use [default: GPU 0]')
-parser.add_argument('--model', default='pointnet_cls', choices=model_choices, help='Model name: pointnet_cls or pointnet_cls_basic [default: pointnet_cls]')
-parser.add_argument('--dataset', default='plane1', choices=dataset_choices, help='Dataset: chordiogram representation [default: plane11]')
-parser.add_argument('--log_dir', default='log', help='Log dir [default: log]')
-parser.add_argument('--num_point', type=int, default=1024, help='Point Number [256/512/1024/2048] [default: 1024]')
-parser.add_argument('--max_epoch', type=int, default=250, help='Epoch to run [default: 250]')
-parser.add_argument('--batch_size', type=int, default=32, help='Batch Size during training [default: 32]')
-parser.add_argument('--learning_rate', type=float, default=0.001, help='Initial learning rate [default: 0.001]')
-parser.add_argument('--momentum', type=float, default=0.9, help='Initial learning rate [default: 0.9]')
-parser.add_argument('--optimizer', default='adam', help='adam or momentum [default: adam]')
-parser.add_argument('--decay_step', type=int, default=200000, help='Decay step for lr decay [default: 200000]')
-parser.add_argument('--decay_rate', type=float, default=0.7, help='Decay rate for lr decay [default: 0.8]')
-parser.add_argument('--train_test', default="z-z", help='Train test setting: z-z]')
-parser.add_argument('--flip_train_test', default=False, help='Flips training and testing dataset')
-parser.add_argument('--augment', default=False, help='Augment the dataset')
-parser.add_argument('--save_freq', default=5, help='Save frequency in epochs')
-FLAGS = parser.parse_args()
+# model_choices = ["pointnet_cls",
+#                  "pointnet_cls_basic",
+#                  "pointnet_no3trans",
+#                  "pointnet_notrans",
+#                  'pointnet_notrans_add1024',
+#                  'pointnet_notrans_add2x1024',
+#                  'pointnet_notrans_add128',
+#                  'pointnet_notrans_add2x128',
+#                  'pointnet_notrans_add3x128',
+#                  'pointnet_notrans_add64',
+#                  'pointnet_notrans_add2x64',
+#                  'pointnet_notrans_add3x64']
+
+# dataset_choices = ["plane0", "plane1", "plane2", "original", "darboux", "darboux_aug", "darboux_expand",  "darboux_expand_aug"]
+# train_test = ["z-z", "z-so3", "so3-so3"]
+# parser = argparse.ArgumentParser()
+# parser.add_argument('--gpu', type=int, default=0, help='GPU to use [default: GPU 0]')
+# parser.add_argument('--model', default='pointnet_cls', choices=model_choices, help='Model name: pointnet_cls or pointnet_cls_basic [default: pointnet_cls]')
+# parser.add_argument('--dataset', default='plane1', choices=dataset_choices, help='Dataset: chordiogram representation [default: plane11]')
+# parser.add_argument('--log_dir', default='log', help='Log dir [default: log]')
+# parser.add_argument('--num_point', type=int, default=1024, help='Point Number [256/512/1024/2048] [default: 1024]')
+# parser.add_argument('--max_epoch', type=int, default=250, help='Epoch to run [default: 250]')
+# parser.add_argument('--batch_size', type=int, default=32, help='Batch Size during training [default: 32]')
+# parser.add_argument('--learning_rate', type=float, default=0.001, help='Initial learning rate [default: 0.001]')
+# parser.add_argument('--momentum', type=float, default=0.9, help='Initial learning rate [default: 0.9]')
+# parser.add_argument('--optimizer', default='adam', help='adam or momentum [default: adam]')
+# parser.add_argument('--decay_step', type=int, default=200000, help='Decay step for lr decay [default: 200000]')
+# parser.add_argument('--decay_rate', type=float, default=0.7, help='Decay rate for lr decay [default: 0.8]')
+# parser.add_argument('--train_test', default="z-z", help='Train test setting: z-z]')
+# parser.add_argument('--flip_train_test', default=False, help='Flips training and testing dataset')
+# parser.add_argument('--augment', default=False, help='Augment the dataset')
+# parser.add_argument('--save_freq', default=5, help='Save frequency in epochs')
+# FLAGS = parser.parse_args()
 
 
-BATCH_SIZE = FLAGS.batch_size
-NUM_POINT = FLAGS.num_point
-MAX_EPOCH = FLAGS.max_epoch
-BASE_LEARNING_RATE = FLAGS.learning_rate
-GPU_INDEX = FLAGS.gpu
-MOMENTUM = FLAGS.momentum
-OPTIMIZER = FLAGS.optimizer
-DECAY_STEP = FLAGS.decay_step
-DECAY_RATE = FLAGS.decay_rate
-TRAIN_TEST = FLAGS.train_test
-FLIP_TRAIN_TEST = FLAGS.flip_train_test
+# BATCH_SIZE = FLAGS.batch_size
+# NUM_POINT = FLAGS.num_point
+# MAX_EPOCH = FLAGS.max_epoch
+# BASE_LEARNING_RATE = FLAGS.learning_rate
+# GPU_INDEX = FLAGS.gpu
+# MOMENTUM = FLAGS.momentum
+# OPTIMIZER = FLAGS.optimizer
+# DECAY_STEP = FLAGS.decay_step
+# DECAY_RATE = FLAGS.decay_rate
+# TRAIN_TEST = FLAGS.train_test
+# FLIP_TRAIN_TEST = FLAGS.flip_train_test
 
-MODEL = importlib.import_module(FLAGS.model) # import network module
-MODEL_FILE = os.path.join(BASE_DIR, 'models', FLAGS.model+'.py')
-LOG_DIR = FLAGS.log_dir
-if not os.path.exists(LOG_DIR): os.mkdir(LOG_DIR)
-os.system('cp %s %s' % (MODEL_FILE, LOG_DIR)) # bkp of model def
-os.system('cp train.py %s' % (LOG_DIR)) # bkp of train procedure
-LOG_FOUT = open(os.path.join(LOG_DIR, 'log_train.txt'), 'w')
-LOG_FOUT.write(str(FLAGS)+'\n')
+# MODEL = importlib.import_module(FLAGS.model) # import network module
+# MODEL_FILE = os.path.join(BASE_DIR, 'models', FLAGS.model+'.py')
+# LOG_DIR = FLAGS.log_dir
+# if not os.path.exists(LOG_DIR): os.mkdir(LOG_DIR)
+# os.system('cp %s %s' % (MODEL_FILE, LOG_DIR)) # bkp of model def
+# os.system('cp train.py %s' % (LOG_DIR)) # bkp of train procedure
+# LOG_FOUT = open(os.path.join(LOG_DIR, 'log_train.txt'), 'w')
+# LOG_FOUT.write(str(FLAGS)+'\n')
 
-MAX_NUM_POINT = 2048
-NUM_CLASSES = 40
+# MAX_NUM_POINT = 2048
+# NUM_CLASSES = 40
 
-BN_INIT_DECAY = 0.5
-BN_DECAY_DECAY_RATE = 0.5
-BN_DECAY_DECAY_STEP = float(DECAY_STEP)
-BN_DECAY_CLIP = 0.99
+# BN_INIT_DECAY = 0.5
+# BN_DECAY_DECAY_RATE = 0.5
+# BN_DECAY_DECAY_STEP = float(DECAY_STEP)
+# BN_DECAY_CLIP = 0.99
 
-HOSTNAME = socket.gethostname()
+# HOSTNAME = socket.gethostname()
 
 #ModelNet40 official train/test split
-DatasetPath = {
-    "plane0": {
-        "train": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane0/train_files.txt'),
-        "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane0/test_files.txt'),
-        "num_chord_features": 7,
-    },
-    "plane1": {
-        "train": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane1/train_files.txt'),
-        "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane1/test_files.txt'),
-        "num_chord_features": 3,
-    },
-    "plane2": {
-        "train": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane2/train_files.txt'),
-        "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane2/test_files.txt'),
-        "num_chord_features": 4,
-    },
-    "original": {
-        "train": os.path.join(BASE_DIR, '/NAS/data/christine/modelnet40_ply_hdf5_2048/train_files.txt'),
-        "test": os.path.join(BASE_DIR, '/NAS/data/christine/modelnet40_ply_hdf5_2048/test_files.txt'),
-        "num_chord_features": 3,
-    },
-    "darboux": {
-        "train": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/darboux/train_files.txt'),
-        "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/darboux/test_files.txt'),
-        "num_chord_features": 4,
-    },
-    "darboux_expand": {
-        "train": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/darboux/train_files.txt'),
-        "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/darboux/test_files.txt'),
-        "num_chord_features": 6,
-    },
-    "darboux_aug": {
-        "train": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/darboux_aug/train_files.txt'),
-        "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/darboux_aug/test_files.txt'),
-        "num_chord_features": 5,
-    },
-    "darboux_expand_aug": {
-        "train": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/darboux_aug/train_files.txt'),
-        "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/darboux_aug/test_files.txt'),
-        "num_chord_features": 6,
-    },
-}
+FLAGS = options.get_options()
 
-if FLAGS.augment:
-    filepath_parts = DatasetPath[FLAGS.dataset]['train'].split('/')[:-1]
-    filepath_parts += ['train_files_aug_5.txt']
-    filepath = '/'.join(filepath_parts)
-else:    
-    filepath_parts = DatasetPath[FLAGS.dataset]['train'].split('/')[:-1]
-    filepath_parts += ['train_files_aug_1.txt']
-    filepath = '/'.join(filepath_parts)
+# DatasetPath = {
+#     "plane0": {
+#         "train": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane0/train_files.txt'),
+#         "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane0/test_files.txt'),
+#         "num_chord_features": 7,
+#     },
+#     "plane1": {
+#         "train": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane1/train_files.txt'),
+#         "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane1/test_files.txt'),
+#         "num_chord_features": 3,
+#     },
+#     "plane2": {
+#         "train": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane2/train_files.txt'),
+#         "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/plane2/test_files.txt'),
+#         "num_chord_features": 4,
+#     },
+#     "original": {
+#         "train": os.path.join(BASE_DIR, '/NAS/data/christine/modelnet40_ply_hdf5_2048/train_files.txt'),
+#         "test": os.path.join(BASE_DIR, '/NAS/data/christine/modelnet40_ply_hdf5_2048/test_files.txt'),
+#         "num_chord_features": 3,
+#     },
+#     "darboux": {
+#         "train": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/darboux/train_files.txt'),
+#         "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/darboux/test_files.txt'),
+#         "num_chord_features": 4,
+#     },
+#     "darboux_expand": {
+#         "train": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/darboux/train_files.txt'),
+#         "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/darboux/test_files.txt'),
+#         "num_chord_features": 6,
+#     },
+#     "darboux_aug": {
+#         "train": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/darboux_aug/train_files.txt'),
+#         "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/darboux_aug/test_files.txt'),
+#         "num_chord_features": 5,
+#     },
+#     "darboux_expand_aug": {
+#         "train": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/darboux_aug/train_files.txt'),
+#         "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/darboux_aug/test_files.txt'),
+#         "num_chord_features": 6,
+#     },
+# }
 
-DatasetPath[FLAGS.dataset]['train'] = filepath
-DSET_INFO = DatasetPath[FLAGS.dataset]
+# if FLAGS.augment:
+#     filepath_parts = DatasetPath[FLAGS.dataset]['train'].split('/')[:-1]
+#     filepath_parts += ['train_files_aug_5.txt']
+#     filepath = '/'.join(filepath_parts)
+# else:    
+#     filepath_parts = DatasetPath[FLAGS.dataset]['train'].split('/')[:-1]
+#     filepath_parts += ['train_files_aug_1.txt']
+#     filepath = '/'.join(filepath_parts)
+# 
+# DatasetPath[FLAGS.dataset]['train'] = filepath
+
+
+
+DSET_INFO = FLAGS.DatasetPath[FLAGS.dataset]
 #TRAIN_FILES = provider.getDataFiles( \
 #    os.path.join(BASE_DIR, 'data/modelnet40_ply_hdf5_2048/train_files.txt'))
 #TEST_FILES = provider.getDataFiles(\
@@ -144,6 +153,8 @@ TRAIN_FILES = provider.getDataFiles(DSET_INFO['train'])
 
 TEST_FILES = provider.getDataFiles(DSET_INFO['test'])
     # os.path.join(BASE_DIR, '../../data/chords_dataset/test_files_2_angles.txt'))
+
+exit()
 
 # Flips the training and testing datasets
 if FLIP_TRAIN_TEST:
