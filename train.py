@@ -11,7 +11,12 @@ import tensorflow as tf
 
 import options
 import provider
+
 from utils import tf_util
+from utils.util import log_string
+from utils.util import get_learning_rate 
+from utils.util import get_bn_decay
+from utils.util import perturb_data
 
 
 FLAGS = options.get_options()
@@ -24,53 +29,6 @@ if FLAGS.flip_train_test:
     FLAGS.train_path = FLAGS.test_path
     FLAGS.test_path = AUX_FLIP
 
-def log_string(out_str):
-    FLAGS.log_file.write(out_str+'\n')
-    FLAGS.log_file.flush()
-    print(out_str)
-
-
-def get_learning_rate(batch):
-    learning_rate = tf.train.exponential_decay(
-                        FLAGS.learning_rate,  # Base learning rate.
-                        batch * FLAGS.batch_size,  # Current index into the dataset.
-                        FLAGS.decay_step,          # Decay step.
-                        FLAGS.decay_rate,          # Decay rate.
-                        staircase=True)
-    learning_rate = tf.maximum(learning_rate, 0.00001) # CLIP THE LEARNING RATE!
-    return learning_rate
-
-def get_bn_decay(batch):
-    bn_momentum = tf.train.exponential_decay(
-                      FLAGS.bn_init_decay,
-                      batch*FLAGS.batch_size,
-                      FLAGS.bn_decay_decay_step,
-                      FLAGS.bn_decay_decay_rate,
-                      staircase=True)
-    bn_decay = tf.minimum(FLAGS.bn_decay_clip, 1 - bn_momentum)
-    return bn_decay
-
-
-def purturb_data(FLAGS, data, mode='train'):
-    if FLAGS.dataset in ["original"]:
-        rotated_data = provider.rotate_point_cloud(data, mode, FLAGS.train_test)
-        jittered_data = provider.jitter_point_cloud(rotated_data)
-    elif FLAGS.dataset in ["plane0"]:
-        rotated_data = provider.rotate_plane0_point_cloud(data, mode, FLAGS.train_test)
-        jittered_data = provider.jitter_plane0(rotated_data)
-    elif FLAGS.dataset in ["darboux_expand"]:
-        rotated_data = provider.expand_darboux(data)
-        jittered_data = provider.jitter_expand_darboux(rotated_data)
-    else:
-        rotated_data = data
-        if FLAGS.dataset in ["plane1"]:
-            jittered_data = provider.jitter_plane1(rotated_data)
-        elif FLAGS.dataset in ["plane2"]:
-            jittered_data = provider.jitter_plane2(rotated_data)
-        else:
-            jittered_data = provider.jitter_darboux(rotated_data)
-
-    return rotated_data, jittered_data
 
 
 def train():
@@ -86,7 +44,7 @@ def train():
             epoch_counter = tf.Variable(0)
             eval_accuracy = tf.Variable(0)
             inc = tf.assign_add(epoch_counter, 1, name='increment')
-            bn_decay = get_bn_decay(batch)
+            bn_decay = get_bn_decay(FLAGS, batch)
             tf.summary.scalar('bn_decay', bn_decay)
 
             # Get model and loss 
@@ -100,7 +58,7 @@ def train():
             tf.summary.scalar('accuracy', accuracy)
 
             # Get training operator
-            learning_rate = get_learning_rate(batch)
+            learning_rate = get_learning_rate(FLAGS, batch)
             tf.summary.scalar('learning_rate', learning_rate)
             if FLAGS.optimizer == 'momentum':
                 optimizer = tf.train.MomentumOptimizer(learning_rate, momentum=MOMENTUM)
@@ -112,8 +70,7 @@ def train():
             saver = tf.train.Saver()
 
         # Create a session
-        config = FLAGS.config
-        sess = tf.Session(config=config)
+        sess = tf.Session(config=FLAGS.config)
 
         # Add summary writers
         merged = tf.summary.merge_all()
@@ -151,7 +108,7 @@ def train():
         assert sess.run(epoch_counter) < 250, 'Training is complete.'
 
         for epoch in range(sess.run(epoch_counter), FLAGS.max_epoch + 1):
-            log_string('**** EPOCH %03d ****' % (epoch))
+            log_string(FLAGS, '**** EPOCH %03d ****' % (epoch))
             sys.stdout.flush()
 
             train_one_epoch(sess, ops, train_writer)
@@ -162,7 +119,7 @@ def train():
             # Save the variables to disk.
             if epoch % FLAGS.save_freq == 0:
                 save_path = saver.save(sess, os.path.join(FLAGS.log_dir, "model.ckpt"), global_step=batch)
-                log_string("Model saved in file: %s" % save_path)
+                log_string(FLAGS, "Model saved in file: %s" % save_path)
 
 
 
@@ -179,7 +136,7 @@ def train_one_epoch(sess, ops, train_writer):
     np.random.shuffle(train_file_idxs)
 
     for fn in range(len(TRAIN_FILES)):
-        log_string('----' + str(fn) + '-----')
+        log_string(FLAGS, '----' + str(fn) + '-----')
         current_data, current_label = provider.loadDataFile(TRAIN_FILES[train_file_idxs[fn]])
         current_data = current_data[:,0:FLAGS.num_point,:]
         current_data, current_label, _ = provider.shuffle_data(current_data, np.squeeze(current_label))
@@ -198,7 +155,7 @@ def train_one_epoch(sess, ops, train_writer):
 
             # Augment batched point clouds by rotation and jittering
             # rotation depends on dataset and train/test type
-            rotated_data, jittered_data = purturb_data(FLAGS, current_data[start_idx:end_idx, :, :], 'train')
+            rotated_data, jittered_data = perturb_data(FLAGS, current_data[start_idx:end_idx, :, :], 'train')
 
             feed_dict = {ops['pointclouds_pl']: jittered_data,
                          ops['labels_pl']: current_label[start_idx:end_idx],
@@ -213,8 +170,8 @@ def train_one_epoch(sess, ops, train_writer):
             total_seen += FLAGS.batch_size
             loss_sum += loss_val
 
-        log_string('mean loss: %f' % (loss_sum / float(num_batches)))
-        log_string('accuracy: %f' % (total_correct / float(total_seen)))
+        log_string(FLAGS, 'mean loss: %f' % (loss_sum / float(num_batches)))
+        log_string(FLAGS, 'accuracy: %f' % (total_correct / float(total_seen)))
 
 
 def eval_one_epoch(sess, ops, test_writer):
@@ -227,7 +184,7 @@ def eval_one_epoch(sess, ops, test_writer):
     total_correct_class = [0 for _ in range(NUM_CLASSES)]
 
     for fn in range(len(TEST_FILES)):
-        log_string('----' + str(fn) + '-----')
+        log_string(FLAGS, '----' + str(fn) + '-----')
         current_data, current_label = provider.loadDataFile(TEST_FILES[fn])
         current_data = current_data[:,0:FLAGS.num_point,:]
         current_label = np.squeeze(current_label)
@@ -240,7 +197,7 @@ def eval_one_epoch(sess, ops, test_writer):
             end_idx = (batch_idx+1) * FLAGS.batch_size
 
             # Augment batched point clouds by rotation and jittering
-            rotated_data, _ = purturb_data(FLAGS, current_data[start_idx:end_idx, :, :], 'test')
+            rotated_data, _ = perturb_data(FLAGS, current_data[start_idx:end_idx, :, :], 'test')
             
             feed_dict = {ops['pointclouds_pl']: rotated_data,
                          ops['labels_pl']: current_label[start_idx:end_idx],
@@ -260,9 +217,9 @@ def eval_one_epoch(sess, ops, test_writer):
                 total_correct_class[l] += (pred_val[i-start_idx] == l)
 
 
-    log_string('eval mean loss: %f' % (loss_sum / float(total_seen)))
-    log_string('eval accuracy: %f'% (total_correct / float(total_seen)))
-    log_string('eval avg class acc: %f' % (np.mean(np.array(total_correct_class)/np.array(total_seen_class,dtype=np.float))))
+    log_string(FLAGS, 'eval mean loss: %f' % (loss_sum / float(total_seen)))
+    log_string(FLAGS, 'eval accuracy: %f'% (total_correct / float(total_seen)))
+    log_string(FLAGS, 'eval avg class acc: %f' % (np.mean(np.array(total_correct_class)/np.array(total_seen_class,dtype=np.float))))
 
 
 
