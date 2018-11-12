@@ -232,15 +232,12 @@ def jitter_expand_darboux(batch_data, sigma=0.01, clip=0.05):
     C -= 2 # to get darboux (not expand) length in the next step
 
     assert(clip > 0)
-    jittered_data_darboux = np.clip(sigma * np.random.randn(B, N, C), -1*clip, clip)
+    # jittered_data_darboux = np.clip(sigma * np.random.randn(B, N, C), -1*clip, clip)
+    jittered_darboux = np.clip(sigma * np.random.randn(B, N, C), -1*clip, clip)
+    jittered_data = expand_darboux(jittered_darboux)
     # interpret jitter as angle
-    jittered_data = np.zeros((batch_data.shape[0], batch_data.shape[1],  6), dtype=np.float32)
-    jittered_data[:, :, 0:2] = jittered_data_darboux[:, :, 0:2]
-    jittered_data[:, :, 2:4] = np.array([np.cos(jittered_data_darboux[:, :, 2]).T, np.sin(jittered_data_darboux[:, :, 2]).T]).T
-    jittered_data[:, :, 4:6] = np.array([np.cos(jittered_data_darboux[:, :, 3]).T, np.sin(jittered_data_darboux[:, :, 3]).T]).T
-
     jittered_data[:, :, 0] += batch_data[:, :, 0]
-    jittered_data[:, :, 1] += np.cos(np.arccos(jittered_data[:, :, 1]) + np.arccos(batch_data[:, :, 1]))
+    jittered_data[:, :, 1] = np.cos(np.arccos(jittered_data[:, :, 1]) + np.arccos(batch_data[:, :, 1]))
     # cos(alpha + beta) = cos(alpha)cos(beta) - sin(alpha)sin(beta)
     jittered_data[:, :, 2] = jittered_data[:, :, 2]*batch_data[:, :, 2] - jittered_data[:, :, 3]*batch_data[:, :, 3]
     # sin(alpha + beta) = sin(alpha) cos(beta) + cos(alpha) sin(beta)
