@@ -45,6 +45,7 @@ parser.add_argument('--decay_rate', type=float, default=0.7, help='Decay rate fo
 parser.add_argument('--train_test', default="z-z", help='Train test setting: z-z]')
 parser.add_argument('--flip_train_test', default=False, help='Flips training and testing dataset')
 parser.add_argument('--augment', default=False, help='Augment the dataset')
+parser.add_argument('--save_freq', default=5, help='Save frequency in epochs')
 FLAGS = parser.parse_args()
 
 
@@ -109,7 +110,7 @@ DatasetPath = {
     "darboux_expand": {
         "train": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/darboux/train_files.txt'),
         "test": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/darboux/test_files.txt'),
-        "num_chord_features": 4,
+        "num_chord_features": 6,
     },
     "darboux_aug": {
         "train": os.path.join(BASE_DIR, '/NAS/data/diego/chords_dataset/darboux_aug/train_files.txt'),
@@ -273,7 +274,7 @@ def train():
             sess.run(inc)
 
             # Save the variables to disk.
-            if epoch % 10 == 0:
+            if epoch % FLAGS.save_freq == 0:
                 save_path = saver.save(sess, os.path.join(LOG_DIR, "model.ckpt"), global_step=batch)
                 log_string("Model saved in file: %s" % save_path)
 
@@ -319,8 +320,8 @@ def train_one_epoch(sess, ops, train_writer):
                 rotated_data = provider.rotate_plane0_point_cloud(current_data[start_idx:end_idx, :, :], 'train', TRAIN_TEST)
                 jittered_data = provider.jitter_plane0(rotated_data)
             elif FLAGS.dataset in ["darboux_expand"]:
-                rotated_data = provider.expand_darbox(current_data[start_idx:end_idx, :, :])
-                jittered_data = provider.jitter_darboux_expand(rotated_data)
+                rotated_data = provider.expand_darboux(current_data[start_idx:end_idx, :, :])
+                jittered_data = provider.jitter_expand_darboux(rotated_data)
             else:
                 rotated_data = current_data[start_idx:end_idx, :, :]
                 if FLAGS.dataset in ["plane1"]:
@@ -378,6 +379,8 @@ def eval_one_epoch(sess, ops, test_writer):
                 rotated_data = provider.rotate_point_cloud(current_data[start_idx:end_idx, :, :], 'test', TRAIN_TEST)
             elif FLAGS.dataset in ["plane0"]:
                 rotated_data = provider.rotate_plane0_point_cloud(current_data[start_idx:end_idx, :, :], 'test', TRAIN_TEST)
+            elif FLAGS.dataset in ["darboux_expand"]:
+                rotated_data = provider.expand_darboux(current_data[start_idx:end_idx, :, :])
             else:
                 rotated_data = current_data[start_idx:end_idx, :, :]
 
