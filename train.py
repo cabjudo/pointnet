@@ -48,7 +48,7 @@ def train():
             tf.summary.scalar('bn_decay', bn_decay)
 
             # Get model and loss 
-            pred, end_points = FLAGS.model.get_model(pointclouds_pl, is_training_pl, bn_decay=bn_decay,
+            pred, end_points = FLAGS.model.get_model(pointclouds_pl, is_training_pl,
                                                input_dims=FLAGS.num_chord_features, num_classes=FLAGS.num_classes)
             loss = FLAGS.model.get_loss(pred, labels_pl, end_points)
             tf.summary.scalar('loss', loss)
@@ -66,7 +66,7 @@ def train():
             if FLAGS.optimizer == 'momentum':
                 optimizer = tf.train.MomentumOptimizer(learning_rate, momentum=FLAGS.momentum)
             elif FLAGS.optimizer == 'adam':
-                optimizer = tf.train.AdamOptimizer(learning_rate)
+                optimizer = tf.train.AdamOptimizer()
             train_op = optimizer.minimize(loss, global_step=batch)
 
             # Add ops to save and restore all the variables.
