@@ -138,6 +138,7 @@ def get_options():
     
     FLAGS.train_path = representation['train']
     FLAGS.test_path = representation['test']
+    FLAGS.shape_names_path = os.path.join(os.path.dirname(os.path.dirname(representation['train'])), 'shape_names.txt')
     FLAGS.num_chord_features = representation['num_chord_features']
     FLAGS.num_classes = representation['num_classes']
 

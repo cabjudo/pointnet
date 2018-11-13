@@ -17,8 +17,7 @@ from utils.util import log_string
 
 FLAGS = options.get_options()
 
-SHAPE_NAMES = [line.rstrip() for line in \
-    open(os.path.join(FLAGS.basedir, 'data/modelnet40_ply_hdf5_2048/shape_names.txt'))] 
+SHAPE_NAMES = [line.rstrip() for line in open(FLAGS.shape_names_path)]
 TRAIN_FILES = provider.getDataFiles(FLAGS.train_path)
 TEST_FILES = provider.getDataFiles(FLAGS.test_path)
 
