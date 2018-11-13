@@ -62,7 +62,7 @@ def evaluate(num_votes):
         loss = FLAGS.model.get_loss(pred, labels_pl, end_points)
         
         # Add ops to save and restore all the variables.
-        saver = tf.train.Saver()
+        saver = tf.train.Saver(save_relative_paths=True)
         
     # Create a session
     # config = tf.ConfigProto()

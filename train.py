@@ -67,7 +67,7 @@ def train():
             train_op = optimizer.minimize(loss, global_step=batch)
 
             # Add ops to save and restore all the variables.
-            saver = tf.train.Saver()
+            saver = tf.train.Saver(save_relative_paths=True)
 
         # Create a session
         sess = tf.Session(config=FLAGS.config)
