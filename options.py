@@ -21,7 +21,7 @@ model_choices = ["pointnet_cls",
                  'pointnet_notrans_add2x64',
                  'pointnet_notrans_add3x64']
 
-dataset_choices = ["modelnet40",
+dataset_choices = ["modelnet40", 'modelnet40_aws',
                    "shrec17"]
 
 rep_choices = ["plane0",
