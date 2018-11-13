@@ -5,73 +5,8 @@ import importlib
 
 import tensorflow as tf
 
+import config_reader
 
-DatasetPath = {
-    "modelnet40": {
-        "plane0": {
-            "train": '/NAS/data/diego/chords_dataset/plane0/train_files.txt',
-            "test": '/NAS/data/diego/chords_dataset/plane0/test_files.txt',
-            "num_chord_features": 7,
-        },
-        "plane1": {
-            "train": '/NAS/data/diego/chords_dataset/plane1/train_files.txt',
-            "test": '/NAS/data/diego/chords_dataset/plane1/test_files.txt',
-            "num_chord_features": 3,
-        },
-        "plane2": {
-            "train": '/NAS/data/diego/chords_dataset/plane2/train_files.txt',
-            "test": '/NAS/data/diego/chords_dataset/plane2/test_files.txt',
-            "num_chord_features": 4,
-        },
-        "original": {
-            "train": '/NAS/data/christine/modelnet40_ply_hdf5_2048/train_files.txt',
-            "test": '/NAS/data/christine/modelnet40_ply_hdf5_2048/test_files.txt',
-            "num_chord_features": 3,
-        },
-        "darboux": {
-            "train": '/NAS/data/diego/chords_dataset/darboux/train_files.txt',
-            "test": '/NAS/data/diego/chords_dataset/darboux/test_files.txt',
-            "num_chord_features": 4,
-        },
-        "darboux_expand": {
-            "train": '/NAS/data/diego/chords_dataset/darboux/train_files.txt',
-            "test": '/NAS/data/diego/chords_dataset/darboux/test_files.txt',
-            "num_chord_features": 6,
-        },
-        "darboux_aug": {
-            "train": '/NAS/data/diego/chords_dataset/darboux_aug/train_files.txt',
-            "test": '/NAS/data/diego/chords_dataset/darboux_aug/test_files.txt',
-            "num_chord_features": 5,
-        },
-        "darboux_expand_aug": {
-            "train": '/NAS/data/diego/chords_dataset/darboux_aug/train_files.txt',
-            "test": '/NAS/data/diego/chords_dataset/darboux_aug/test_files.txt',
-            "num_chord_features": 6,
-        },
-    },
-    "shrec17": {
-        "plane0": {
-            "train": '/NAS/data/diego/chords_dataset_shrec17/plane0/train_files.txt',
-            "test": '/NAS/data/diego/chords_dataset_shrec17/plane0/test_files.txt',
-            "num_chord_features": 7,
-        },
-        "original": {
-            "train": '/NAS/data/christine/modelnet40_ply_hdf5_2048/train_files.txt',
-            "test": '/NAS/data/christine/modelnet40_ply_hdf5_2048/test_files.txt',
-            "num_chord_features": 3,
-        },
-        "darboux": {
-            "train": '/NAS/data/diego/chords_dataset_shrec17/darboux/train_files.txt',
-            "test": '/NAS/data/diego/chords_dataset_shrec17/darboux/test_files.txt',
-            "num_chord_features": 4,
-        },
-        "darboux_expand": {
-            "train": '/NAS/data/diego/chords_dataset_shrec17/darboux/train_files.txt',
-            "test": '/NAS/data/diego/chords_dataset_shrec17/darboux/test_files.txt',
-            "num_chord_features": 6,
-        },
-    },
-}
 
 model_choices = ["pointnet_cls",
                  "pointnet_cls_basic",
@@ -90,13 +25,13 @@ dataset_choices = ["modelnet40",
                    "shrec17"]
 
 rep_choices = ["plane0",
-                   "plane1",
-                   "plane2",
-                   "original",
-                   "darboux",
-                   "darboux_aug",
-                   "darboux_expand",
-                   "darboux_expand_aug"]
+               "plane1",
+               "plane2",
+               "original",
+               "darboux",
+               "darboux_aug",
+               "darboux_expand",
+               "darboux_expand_aug"]
 
 train_test = ["z-z",
               "z-so3",
@@ -120,7 +55,7 @@ def load(FLAGS):
     if not os.path.exists(FLAGS.log_dir): os.mkdir(FLAGS.log_dir)
     os.system('cp %s %s' % (FLAGS.model_file, FLAGS.log_dir)) # bkp of model def
     os.system('cp train.py %s' % (FLAGS.log_dir)) # bkp of train procedure
-    FLAGS.log_file = open(os.path.join(FLAGS.log_dir, 'log_train.txt'), 'w')
+    FLAGS.log_file = open(os.path.join(FLAGS.log_dir, 'log_train.txt'), 'w+')
     FLAGS.log_file.write(str(FLAGS)+'\n')
 
     return FLAGS
@@ -156,7 +91,6 @@ def get_options():
     parser.add_argument('--optimizer', default='adam', help='adam or momentum [default: adam]')
     parser.add_argument('--decay_step', type=int, default=200000, help='Decay step for lr decay [default: 200000]')
     parser.add_argument('--decay_rate', type=float, default=0.7, help='Decay rate for lr decay [default: 0.8]')
-    parser.add_argument('--num_classes', default=40, help='Num. of classes in the dataset', type=int)
     
     # Test options
     parser.add_argument('--dump_dir', default='dump', help='dump folder path [dump]')
@@ -173,25 +107,35 @@ def get_options():
     
     FLAGS = parser.parse_args()
 
-    # some hack to switch to the augmented dataset
-    test_key = FLAGS.dataset + '_aug'
-    if test_key in DatasetPath.keys():
-        if FLAGS.augment:
-            filepath_parts = DatasetPath[FLAGS.dataset][FLAGS.representation]['train'].split('/')[:-1]
-            filepath_parts += ['train_files_aug_5.txt']
-            filepath = '/'.join(filepath_parts)
-        else:    
-            filepath_parts = DatasetPath[FLAGS.dataset][FLAGS.representation]['train'].split('/')[:-1]
-            filepath_parts += ['train_files_aug_1.txt']
-            filepath = '/'.join(filepath_parts)
-    else:
-        filepath = DatasetPath[FLAGS.dataset][FLAGS.representation]['train']
+    # extract from model path
+    if FLAGS.model_path is not None:
+        param_string = FLAGS.model_path.split('/')[-2]
+        print(param_string)
+        # recover model
+        for ind, m in enumerate(model_choices):
+            m = m.replace('_','-')[-9:]
+            if m in param_string:
+                FLAGS.model = model_choices[ind]
+        # recover representation
+        for ind, r in enumerate(rep_choices):
+            if r in param_string:
+                FLAGS.representation = rep_choices[ind]
+        # recover train_test
+        for ind, t in enumerate(train_test):
+            if t in param_string:
+                FLAGS.train_test = train_test[ind]
+            
+        
+    # Dataset load from config file
+    representation = config_reader.get_representation(FLAGS.representation, 'config/' + FLAGS.dataset + '.ini')
+    
+    FLAGS.train_path = representation['train']
+    FLAGS.test_path = representation['test']
+    FLAGS.num_chord_features = representation['num_chord_features']
+    FLAGS.num_classes = representation['num_classes']
 
-    FLAGS.train_path = filepath
-    FLAGS.test_path = DatasetPath[FLAGS.dataset][FLAGS.representation]['test']
-    FLAGS.num_chord_features = DatasetPath[FLAGS.dataset][FLAGS.representation]['num_chord_features']
-
-    # FLAGS.DatasetPath = DatasetPath
+    print(FLAGS)
+    exit()
 
     # add base directory to flags
     FLAGS.basedir = basedir
@@ -216,3 +160,6 @@ def get_options():
     return FLAGS
 
 
+if __name__ == '__main__':
+    FLAGS = get_options()
+    print(FLAGS)

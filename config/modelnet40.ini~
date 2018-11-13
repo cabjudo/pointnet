@@ -1,0 +1,42 @@
+[modelnet40]
+
+[plane0]
+train:/NAS/data/diego/chords_dataset/plane0/train_files.txt
+test:/NAS/data/diego/chords_dataset/plane0/test_files.txt
+num_chord_features: 7
+
+[plane1]
+train: /NAS/data/diego/chords_dataset/plane1/train_files.txt
+test: /NAS/data/diego/chords_dataset/plane1/test_files.txt
+num_chord_features: 3
+
+[plane2]
+train: /NAS/data/diego/chords_dataset/plane2/train_files.txt
+test: /NAS/data/diego/chords_dataset/plane2/test_files.txt
+num_chord_features: 4
+
+[original]
+train: /NAS/data/christine/modelnet40_ply_hdf5_2048/train_files.txt
+test: /NAS/data/christine/modelnet40_ply_hdf5_2048/test_files.txt
+num_chord_features: 3
+
+[darboux]
+train: /NAS/data/diego/chords_dataset/darboux/train_files.txt
+test: /NAS/data/diego/chords_dataset/darboux/test_files.txt
+num_chord_features: 4
+
+[darboux_expand]
+train: /NAS/data/diego/chords_dataset/darboux/train_files.txt
+test: /NAS/data/diego/chords_dataset/darboux/test_files.txt
+num_chord_features: 6
+
+[darboux_aug]
+train: /NAS/data/diego/chords_dataset/darboux_aug/train_files.txt
+test: /NAS/data/diego/chords_dataset/darboux_aug/test_files.txt
+num_chord_features: 5
+
+[darboux_expand_aug]
+train: /NAS/data/diego/chords_dataset/darboux_aug/train_files.txt
+test: /NAS/data/diego/chords_dataset/darboux_aug/test_files.txt
+num_chord_features: 6
+
