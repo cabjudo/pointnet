@@ -76,10 +76,11 @@ def model_path_parsing(FLAGS):
                 FLAGS.representation = rep_choices[ind]
                 break
         # recover train_test
-        for ind, t in enumerate(train_test):
-            if t in param_string:
-                FLAGS.train_test = train_test[ind]
-                break
+        if FLAGS.train_test is None:
+            for ind, t in enumerate(train_test):
+                if t in param_string:
+                    FLAGS.train_test = train_test[ind]
+                    break
 
     return FLAGS
 
@@ -98,7 +99,7 @@ def get_options():
                         help='Dataset [default: modelnet40]')
     
     # Dataset parameters
-    parser.add_argument('--train_test', default="z-z", help='Train test setting: z-z]')
+    parser.add_argument('--train_test', default=None, help='Train test setting: z-z]')
     parser.add_argument('--flip_train_test', default=False, help='Flips training and testing dataset')
     parser.add_argument('--augment', default=False, help='Augment the dataset')
     
