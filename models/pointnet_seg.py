@@ -17,7 +17,7 @@ def placeholder_inputs(batch_size, num_point):
     return pointclouds_pl, labels_pl
 
 
-def get_model(point_cloud, is_training, bn_decay=None):
+def get_model(point_cloud, is_training, bn_decay=None, input_dims=3, return_feature_map=False, num_classes=40):
     """ Classification PointNet, input is BxNx3, output BxNx50 """
     batch_size = point_cloud.get_shape()[0].value
     num_point = point_cloud.get_shape()[1].value
@@ -86,7 +86,10 @@ def get_model(point_cloud, is_training, bn_decay=None):
                          scope='conv10')
     net = tf.squeeze(net, [2]) # BxNxC
 
-    return net, end_points
+    if return_feature_map:
+        return net, end_points, feature_map
+    else:
+        return net, end_points
 
 
 def get_loss(pred, label, end_points, reg_weight=0.001):
