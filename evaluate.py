@@ -54,11 +54,11 @@ def evaluate(num_votes):
     is_training = False
      
     with tf.device('/gpu:'+str(FLAGS.gpu)):
-        pointclouds_pl, labels_pl = FLAGS.model.placeholder_inputs(FLAGS.batch_size, FLAGS.num_point, FLAGS.num_chord_features, num_classes=FLAGS.num_classes)
+        pointclouds_pl, labels_pl = FLAGS.model.placeholder_inputs(FLAGS.batch_size, FLAGS.num_point, FLAGS.num_chord_features)
         is_training_pl = tf.placeholder(tf.bool, shape=())
 
         # simple model
-        pred, end_points = FLAGS.model.get_model(pointclouds_pl, is_training_pl, input_dims=FLAGS.num_chord_features)
+        pred, end_points = FLAGS.model.get_model(pointclouds_pl, is_training_pl, input_dims=FLAGS.num_chord_features, num_classes=FLAGS.num_classes)
         loss = FLAGS.model.get_loss(pred, labels_pl, end_points)
         
         # Add ops to save and restore all the variables.
