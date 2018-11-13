@@ -54,7 +54,7 @@ def evaluate(num_votes):
     is_training = False
      
     with tf.device('/gpu:'+str(FLAGS.gpu)):
-        pointclouds_pl, labels_pl = FLAGS.model.placeholder_inputs(FLAGS.batch_size, FLAGS.num_point, FLAGS.num_chord_features)
+        pointclouds_pl, labels_pl = FLAGS.model.placeholder_inputs(FLAGS.batch_size, FLAGS.num_point, FLAGS.num_chord_features, num_classes=FLAGS.num_classes)
         is_training_pl = tf.placeholder(tf.bool, shape=())
 
         # simple model
