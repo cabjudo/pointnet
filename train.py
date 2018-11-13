@@ -58,10 +58,7 @@ def train():
             tf.summary.scalar('accuracy', accuracy)
 
             # Get training operator
-            if FLAGS.exp_decay_learning_rate:
-                learning_rate = get_learning_rate(FLAGS, batch)
-            else:
-                learning_rate = FLAGS.learning_rate
+            learning_rate = get_learning_rate(FLAGS, batch)
             tf.summary.scalar('learning_rate', learning_rate)
             if FLAGS.optimizer == 'momentum':
                 optimizer = tf.train.MomentumOptimizer(learning_rate, momentum=FLAGS.momentum)
