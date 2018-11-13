@@ -265,9 +265,9 @@ def load_h5(h5_filename, return_fnames=False):
     f = h5py.File(h5_filename, 'r')
     data = f['data'][:]
     label = f['label'][:]
-    fnames = f['fnames'][:]
 
     if return_fnames:
+        fnames = f['fnames'][:]
         return (data, label, fnames)
     else:
         return (data, label)
