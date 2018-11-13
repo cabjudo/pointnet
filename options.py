@@ -60,6 +60,29 @@ def load(FLAGS):
 
     return FLAGS
 
+def model_path_parsing(FLAGS):
+    # extract from model path
+    if FLAGS.model_path is not None:
+        param_string = FLAGS.model_path.split('/')[-2]
+        # recover model
+        for ind, m in enumerate(model_choices):
+            m = m.replace('_','-')[-9:]
+            if m in param_string:
+                FLAGS.model = model_choices[ind]
+                break
+        # recover representation
+        for ind, r in enumerate(rep_choices):
+            if r in param_string:
+                FLAGS.representation = rep_choices[ind]
+                break
+        # recover train_test
+        for ind, t in enumerate(train_test):
+            if t in param_string:
+                FLAGS.train_test = train_test[ind]
+                break
+
+    return FLAGS
+
 
 def get_options():
     # get base directory
@@ -107,25 +130,8 @@ def get_options():
     
     FLAGS = parser.parse_args()
 
-    # extract from model path
-    if FLAGS.model_path is not None:
-        param_string = FLAGS.model_path.split('/')[-2]
-        print(param_string)
-        # recover model
-        for ind, m in enumerate(model_choices):
-            m = m.replace('_','-')[-9:]
-            if m in param_string:
-                FLAGS.model = model_choices[ind]
-        # recover representation
-        for ind, r in enumerate(rep_choices):
-            if r in param_string:
-                FLAGS.representation = rep_choices[ind]
-        # recover train_test
-        for ind, t in enumerate(train_test):
-            if t in param_string:
-                FLAGS.train_test = train_test[ind]
-            
-        
+    FLAGS = model_path_parsing(FLAGS)
+
     # Dataset load from config file
     representation = config_reader.get_representation(FLAGS.representation, 'config/' + FLAGS.dataset + '.ini')
     
@@ -133,9 +139,6 @@ def get_options():
     FLAGS.test_path = representation['test']
     FLAGS.num_chord_features = representation['num_chord_features']
     FLAGS.num_classes = representation['num_classes']
-
-    print(FLAGS)
-    exit()
 
     # add base directory to flags
     FLAGS.basedir = basedir
