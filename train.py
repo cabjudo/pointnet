@@ -105,7 +105,7 @@ def train():
                'merged': merged,
                'step': batch}
 
-        assert sess.run(epoch_counter) < FLAGS.max_epochs, 'Training is complete.'
+        assert sess.run(epoch_counter) < FLAGS.max_epoch, 'Training is complete.'
 
         for epoch in range(sess.run(epoch_counter), FLAGS.max_epoch + 1):
             log_string(FLAGS, '**** EPOCH %03d ****' % (epoch))
