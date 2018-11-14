@@ -261,8 +261,10 @@ def eval_shrec17_output(outdir):
     if outdir[-1] != '/':
         outdir += '/'
     # outdir_arg = os.path.join('../../', outdir)
+    print('Evaluating retrieval...')
     p = subprocess.Popen(['node', 'evaluate.js', outdir],
                          cwd=evaldir)
+    print('Done.')
     p.wait()
 
     import pandas as pd
