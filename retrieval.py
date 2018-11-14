@@ -60,7 +60,7 @@ def retrieval():
     is_training = False
      
     with tf.device('/gpu:'+str(FLAGS.gpu)):
-        pointclouds_pl, labels_pl = FLAGS.model.placeholder_inputs(FLAGS.FLAGS.batch_size, FLAGS.num_point,
+        pointclouds_pl, labels_pl = FLAGS.model.placeholder_inputs(FLAGS.batch_size, FLAGS.num_point,
                                                                    FLAGS.num_chord_features)
         is_training_pl = tf.placeholder(tf.bool, shape=())
 
