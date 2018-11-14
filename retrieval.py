@@ -146,7 +146,12 @@ def retrieval_one_epoch(sess, ops, num_votes=1, topk=1):
 
     thresh = search_thresholds(dists, labels)
 
-    make_shrec17_output_thresh(all_descriptors, scores, fnames, FLAGS.model_path,
+    out_dir = os.path.join(Path(FLAGS.model_path).parent, 'retrieval_out')
+
+    if not os.path.exists(out_dir):
+        os.mkdir(out_dir)
+
+    make_shrec17_output_thresh(all_descriptors, scores, fnames, out_dir,
                                distance='cosine', dists=dists, thresh=thresh)
 
     res = eval_shrec17_output(os.path.split(FLAGS.log_dir)[0])
