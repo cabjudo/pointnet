@@ -84,17 +84,19 @@ def get_darboux_expand(configfile):
     return darboux_expand
 
 
-def get_representation(representation, configfile):
-    if representation == 'plane0':
-        return get_plane0(configfile)
-    if representation == 'darboux':
-        return get_darboux(configfile)
-    if representation == 'darboux_expand':
-        return get_darboux_expand(configfile)
-    if representation == 'darboux_aug':
-        return get_darboux_aug(configfile)
-    if representation == 'darboux_expand_aug':
-        return get_darboux_expand_aug(configfile)
+def get_representation(FLAGS):
+    configfile = 'config/' + FLAGS.dataset + '.ini'
+    if FLAGS.representation == 'plane0':
+        rep = get_plane0(configfile)
+    if FLAGS.representation == 'darboux':
+        rep = get_darboux(configfile)
+    if FLAGS.representation == 'darboux_expand':
+        rep = get_darboux_expand(configfile)
+    if FLAGS.representation == 'darboux_aug':
+        rep = get_darboux_aug(configfile)
+    if FLAGS.representation == 'darboux_expand_aug':
+        rep = get_darboux_expand_aug(configfile)
+    return rep
     
 
 if __name__ == '__main__':

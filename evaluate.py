@@ -146,7 +146,7 @@ def eval_one_epoch(sess, ops, num_votes=1, topk=1):
                 if pred_val[i-start_idx] != l and FLAGS.visu: # ERROR CASE, DUMP!
                     img_filename = '%d_label_%s_pred_%s.jpg' % (error_cnt, SHAPE_NAMES[l],
                                                            SHAPE_NAMES[pred_val[i-start_idx]])
-                    img_filename = os.path.join(DUMP_DIR, img_filename)
+                    img_filename = os.path.join(FLAGS.dump_dir, img_filename)
                     # output_img = pc_util.point_cloud_three_views(np.squeeze(current_data[i, :, :]))
                     # scipy.misc.imsave(img_filename, output_img)
                     error_cnt += 1
