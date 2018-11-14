@@ -213,7 +213,7 @@ def make_shrec17_output_thresh_loop(d, f, s, c, thresh, fnames, predclass, outdi
     ranking = []
     for i in np.argsort(di):
         if fi[i] not in ranking:
-            print(fi[i].decode('UTF-8'), type(fi[i].decode('UTF-8')))
+            #print(fi[i].decode('UTF-8'), type(fi[i].decode('UTF-8')))
             ranking.append(fi[i].decode('UTF-8').replace('.obj', ''))
     ranking = ranking[:max_retrieved]
 
