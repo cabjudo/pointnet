@@ -80,7 +80,7 @@ def retrieval():
     sess = tf.Session(config=FLAGS.config)
 
     # Restore variables from disk.
-    saver.restore(sess, FLAGS.FLAGS.model_path)
+    saver.restore(sess, FLAGS.model_path)
     log_string("Model restored.")
 
     ops = {'pointclouds_pl': pointclouds_pl,
