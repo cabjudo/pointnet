@@ -86,15 +86,21 @@ def get_loss(pred, label, end_points, reg_weight=0.001):
     classify_loss = tf.reduce_mean(loss)
     tf.summary.scalar('classify loss', classify_loss)
 
-    # Enforce the transformation as orthogonal matrix
-    # transform = end_points['transform'] # BxKxK
-    # K = transform.get_shape()[1].value
-    # mat_diff = tf.matmul(transform, tf.transpose(transform, perm=[0,2,1]))
-    # mat_diff -= tf.constant(np.eye(K), dtype=tf.float32)
-    # mat_diff_loss = tf.nn.l2_loss(mat_diff) 
-    # tf.summary.scalar('mat loss', mat_diff_loss)
-
     return classify_loss # + mat_diff_loss * reg_weight
+
+
+def get_trip_loss(pred, label, features reg_weight=0.001):
+    """ pred: B*NUM_CLASSES,
+        label: B, """
+
+    trip_loss = tf.contrib.losses.metric_learning.triplet_semihard_loss(labels=label, embeddings=features)
+    tf.summary.scalar('triplet loss', trip_loss)
+
+    loss = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=pred, labels=label)
+    classify_loss = tf.reduce_mean(loss)
+    tf.summary.scalar('classify loss', classify_loss)
+
+    return classify_loss  + trip_loss
 
 
 if __name__=='__main__':

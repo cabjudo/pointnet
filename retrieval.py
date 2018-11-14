@@ -27,35 +27,6 @@ TRAIN_FILES = provider.getDataFiles(FLAGS.train_path)
 TEST_FILES = provider.getDataFiles(FLAGS.test_path)
 
 
-# def log_string(out_str):
-#     FLAGS.log_file.write(out_str+'\n')
-#     FLAGS.log_file.flush()
-#     print(out_str)
-
-
-# def perturb_data(FLAGS, data, mode='train'):
-#     if FLAGS.dataset in ["original"]:
-#         rotated_data = provider.rotate_point_cloud(data, mode, FLAGS.train_test)
-#         jittered_data = provider.jitter_point_cloud(rotated_data)
-#     elif FLAGS.dataset in ["plane0"]:
-#         rotated_data = provider.rotate_plane0_point_cloud(data, mode, FLAGS.train_test)
-#         jittered_data = provider.jitter_plane0(rotated_data)
-#     elif FLAGS.dataset in ["darboux_expand"]:
-#         rotated_data = provider.expand_darboux(data)
-#         jittered_data = provider.jitter_expand_darboux(rotated_data)
-#     else:
-#         rotated_data = data
-#         if FLAGS.dataset in ["plane1"]:
-#             jittered_data = provider.jitter_plane1(rotated_data)
-#         elif FLAGS.dataset in ["plane2"]:
-#             jittered_data = provider.jitter_plane2(rotated_data)
-#         else:
-#             jittered_data = provider.jitter_darboux(rotated_data)
-
-#     return rotated_data, jittered_data
-
-
-
 def retrieval():
     is_training = False
      
@@ -67,16 +38,12 @@ def retrieval():
         # simple model
         pred, end_points, feature_map = FLAGS.model.get_model(pointclouds_pl, is_training_pl, input_dims=FLAGS.num_chord_features,
                                                  num_classes=FLAGS.num_classes, return_feature_map=True)
-        loss = FLAGS.model.get_loss(pred, labels_pl, end_points)
+        loss = FLAGS.model.get_trip_loss(pred, labels_pl, feature_map)
         
         # Add ops to save and restore all the variables.
         saver = tf.train.Saver()
         
     # Create a session
-    config = tf.ConfigProto()
-    config.gpu_options.allow_growth = True
-    config.allow_soft_placement = True
-    config.log_device_placement = True
     sess = tf.Session(config=FLAGS.config)
 
     # Restore variables from disk.

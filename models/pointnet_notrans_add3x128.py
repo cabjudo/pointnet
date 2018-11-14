@@ -21,9 +21,6 @@ def get_model(point_cloud, is_training, bn_decay=None, input_dims=3, return_feat
     num_point = point_cloud.get_shape()[1].value
     end_points = {}
 
-    # with tf.variable_scope('transform_net1') as sc:
-    #     transform = input_transform_net(point_cloud, is_training, bn_decay, K=3)
-    # point_cloud_transformed = tf.matmul(point_cloud, transform)
     input_image = tf.expand_dims(point_cloud, -1)
 
     net = tf_util.conv2d(input_image, 64, [1, input_dims],
@@ -34,12 +31,6 @@ def get_model(point_cloud, is_training, bn_decay=None, input_dims=3, return_feat
                          padding='VALID', stride=[1,1],
                          bn=True, is_training=is_training,
                          scope='conv2', bn_decay=bn_decay)
-
-    # with tf.variable_scope('transform_net2') as sc:
-    #     transform = feature_transform_net(net, is_training, bn_decay, K=64)
-    # end_points['transform'] = transform
-    # net_transformed = tf.matmul(tf.squeeze(net, axis=[2]), transform)
-    # net_transformed = tf.expand_dims(net_transformed, [2])
 
     net = tf_util.conv2d(net, 64, [1,1],
                          padding='VALID', stride=[1,1],
@@ -94,15 +85,21 @@ def get_loss(pred, label, end_points, reg_weight=0.001):
     classify_loss = tf.reduce_mean(loss)
     tf.summary.scalar('classify loss', classify_loss)
 
-    # Enforce the transformation as orthogonal matrix
-    # transform = end_points['transform'] # BxKxK
-    # K = transform.get_shape()[1].value
-    # mat_diff = tf.matmul(transform, tf.transpose(transform, perm=[0,2,1]))
-    # mat_diff -= tf.constant(np.eye(K), dtype=tf.float32)
-    # mat_diff_loss = tf.nn.l2_loss(mat_diff) 
-    # tf.summary.scalar('mat loss', mat_diff_loss)
-
     return classify_loss # + mat_diff_loss * reg_weight
+
+
+def get_trip_loss(pred, label, features, reg_weight=0.001):
+    """ pred: B*NUM_CLASSES,
+        label: B, """
+
+    trip_loss = tf.contrib.losses.metric_learning.triplet_semihard_loss(labels=label, embeddings=features)
+    tf.summary.scalar('triplet loss', trip_loss)
+
+    loss = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=pred, labels=label)
+    classify_loss = tf.reduce_mean(loss)
+    tf.summary.scalar('classify loss', classify_loss)
+
+    return classify_loss  + trip_loss
 
 
 if __name__=='__main__':
