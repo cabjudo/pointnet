@@ -54,6 +54,8 @@ TEST_FILES = provider.getDataFiles(FLAGS.test_path)
 
 #     return rotated_data, jittered_data
 
+
+
 def retrieval():
     is_training = False
      
