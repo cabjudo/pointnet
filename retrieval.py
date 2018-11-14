@@ -195,7 +195,6 @@ def make_shrec17_output_thresh(descriptors, scores, fnames, outdir,
 
 
 def make_shrec17_output_thresh_loop(d, f, s, c, thresh, fnames, predclass, outdir, max_retrieved=1000):
-    print('Hello world!')
     t = thresh[c]
 
     fd = [(ff, dd)
@@ -209,6 +208,7 @@ def make_shrec17_output_thresh_loop(d, f, s, c, thresh, fnames, predclass, outdi
     ranking = []
     for i in np.argsort(di):
         if fi[i] not in ranking:
+            print(fi[i], type(fi[i]))
             ranking.append(fi[i].replace('.obj', ''))
     ranking = ranking[:max_retrieved]
 
