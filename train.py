@@ -50,7 +50,11 @@ def train():
             # Get model and loss 
             pred, end_points = FLAGS.model.get_model(pointclouds_pl, is_training_pl,
                                                input_dims=FLAGS.num_chord_features, num_classes=FLAGS.num_classes)
-            loss = FLAGS.model.get_loss(pred, labels_pl, end_points)
+
+            if 'shrec17' in FLAGS.dataset:
+                loss = FLAGS.model.get_trip_loss(pred, labels_pl, end_points)
+            else:
+                loss = FLAGS.model.get_loss(pred, labels_pl, end_points)
             tf.summary.scalar('loss', loss)
 
             correct = tf.equal(tf.argmax(pred, 1), tf.to_int64(labels_pl))
