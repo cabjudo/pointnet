@@ -134,10 +134,14 @@ def get_options():
     FLAGS = model_path_parsing(FLAGS)
 
     # Dataset load from config file
-    representation = config_reader.get_representation(FLAGS.representation, 'config/' + FLAGS.dataset + '.ini')
+    representation = config_reader.get_representation(FLAGS)
     
     FLAGS.train_path = representation['train']
     FLAGS.test_path = representation['test']
+
+    if FLAGS.augment:
+        FLAGS.train_path = representation['train_aug']
+
     FLAGS.shape_names_path = os.path.join(os.path.dirname(os.path.dirname(representation['train'])), 'shape_names.txt')
     FLAGS.num_chord_features = representation['num_chord_features']
     FLAGS.num_classes = representation['num_classes']
