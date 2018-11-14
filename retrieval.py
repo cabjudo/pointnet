@@ -146,7 +146,7 @@ def retrieval_one_epoch(sess, ops, num_votes=1, topk=1):
 
     thresh = search_thresholds(dists, labels)
 
-    out_dir = os.path.join(Path(FLAGS.model_path).parent, 'retrieval_out')
+    out_dir = os.path.join(os.path.dirname(FLAGS.model_path), 'retrieval_out')
 
     if not os.path.exists(out_dir):
         os.mkdir(out_dir)
