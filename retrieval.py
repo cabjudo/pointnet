@@ -184,11 +184,12 @@ def make_shrec17_output_thresh(descriptors, scores, fnames, outdir,
     lens = Parallel(n_jobs=-1)(delayed(make_shrec17_output_thresh_loop)
                                (d, f, s, c, thresh, fnames, predclass, outdir)
                                for d, f, s, c in zip(dists, fnames, scores, predclass))
-
+    #TypeError: a bytes-like object is required, not 'str'
     print('avg # of elements returned {:2f} {:2f}'.format(np.mean(lens), np.std(lens)))
 
 
 def make_shrec17_output_thresh_loop(d, f, s, c, thresh, fnames, predclass, outdir, max_retrieved=1000):
+    print('Hello world!')
     t = thresh[c]
 
     fd = [(ff, dd)
