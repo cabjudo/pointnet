@@ -208,8 +208,8 @@ def make_shrec17_output_thresh_loop(d, f, s, c, thresh, fnames, predclass, outdi
     ranking = []
     for i in np.argsort(di):
         if fi[i] not in ranking:
-            print(fi[i], type(fi[i]))
-            ranking.append(fi[i].replace('.obj', ''))
+            print(fi[i].tostring(), type(fi[i].tostring()))
+            ranking.append(fi[i].tostring().replace('.obj', ''))
     ranking = ranking[:max_retrieved]
 
     with open(os.path.join(outdir, f), 'w') as fout:
