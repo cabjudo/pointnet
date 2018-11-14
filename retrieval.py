@@ -81,7 +81,7 @@ def retrieval():
 
     # Restore variables from disk.
     saver.restore(sess, FLAGS.model_path)
-    log_string("Model restored.")
+    log_string(FLAGS, "Model restored.")
 
     ops = {'pointclouds_pl': pointclouds_pl,
            'labels_pl': labels_pl,
