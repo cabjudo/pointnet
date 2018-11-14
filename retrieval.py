@@ -107,7 +107,7 @@ def retrieval_one_epoch(sess, ops, num_votes=1, topk=1):
     labels = np.array([[]])
     fnames = np.array([])
     for fn in range(len(TEST_FILES)):
-        log_string('----'+str(fn)+'----')
+        log_string(FLAGS, '----'+str(fn)+'----')
         current_data, current_label, current_fnames = provider.loadDataFile(TEST_FILES[fn], return_fnames=True)
         current_data = current_data[:, 0:FLAGS.num_point, :]
         current_label = np.squeeze(current_label)
