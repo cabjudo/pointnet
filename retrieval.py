@@ -212,7 +212,7 @@ def make_shrec17_output_thresh_loop(d, f, s, c, thresh, fnames, predclass, outdi
             ranking.append(fi[i].decode('UTF-8').replace('.obj', ''))
     ranking = ranking[:max_retrieved]
 
-    with open(os.path.join(outdir, f), 'w') as fout:
+    with open(os.path.join(outdir, f.decode('UTF-8')), 'w') as fout:
         [print(r, file=fout) for r in ranking]
 
     return len(ranking)
