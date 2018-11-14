@@ -38,7 +38,7 @@ def retrieval():
         # simple model
         pred, end_points, feature_map = FLAGS.model.get_model(pointclouds_pl, is_training_pl, input_dims=FLAGS.num_chord_features,
                                                  num_classes=FLAGS.num_classes, return_feature_map=True)
-        loss = FLAGS.model.get_trip_loss(pred, labels_pl, feature_map)
+        loss = FLAGS.model.get_trip_loss(pred, labels_pl, tf.math.l2_normalize(feature_map, axis=-1))
         
         # Add ops to save and restore all the variables.
         saver = tf.train.Saver()
