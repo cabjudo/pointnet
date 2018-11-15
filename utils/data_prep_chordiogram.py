@@ -456,14 +456,14 @@ if __name__ == '__main__':
         all_train_paths, all_test_paths, train_classes, test_classes = get_shrec17_files(
             args.input_dataset_folder, args.num_augment)
 
-    num_h5_train = int(np.ceil(len(all_train_paths) / args.batch_size))
+    '''num_h5_train = int(np.ceil(len(all_train_paths) / args.batch_size))
     d = args.batch_size
     for i in range(num_h5_train):
         create_chordiogram_h5(i, train_classes[i * d:(i + 1) * d],
                               all_train_paths[i * d:(i + 1) * d],
                               dset_folder,
                               args.sampling_method, args.num_samples, args.chord_type, 'train',
-                              args.num_augment, args.cluster)
+                              args.num_augment, args.cluster)'''
 
     num_h5_train = int(np.ceil(len(all_train_paths) / args.batch_size))
     d = args.batch_size
