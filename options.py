@@ -128,7 +128,7 @@ def get_options():
     parser.add_argument('--log_dir', default='log', help='Log dir [default: log]')
     
     # Logging params
-    parser.add_argument('--save_freq', default=5, help='Save frequency in epochs')
+    parser.add_argument('--save_freq', default=2, help='Save frequency in epochs')
     
     FLAGS = parser.parse_args()
 
