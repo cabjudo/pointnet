@@ -113,15 +113,14 @@ def retrieval_one_epoch(sess, ops, num_votes=1, topk=1):
 
     thresh = search_thresholds(dists, labels)
 
-    out_dir = os.path.join(os.path.dirname(FLAGS.model_path), 'retrieval_out')
-
+    out_dir = os.path.join(os.path.dirname(FLAGS.model_path), '3d_chordiogram_retrieval')
     if not os.path.exists(out_dir):
         os.mkdir(out_dir)
 
     make_shrec17_output_thresh(all_descriptors, scores, fnames, out_dir,
                                distance='cosine', dists=dists, thresh=thresh)
 
-    res = eval_shrec17_output(os.path.split(FLAGS.log_dir)[0])
+    res = eval_shrec17_output(out_dir)
     #print(modeldir, datadir, ckpt)
     print(res.head(1))
     print(res.tail(1))
@@ -182,7 +181,11 @@ def make_shrec17_output_thresh_loop(d, f, s, c, thresh, fnames, predclass, outdi
             ranking.append(fi[i].decode('UTF-8').replace('.obj', ''))
     ranking = ranking[:max_retrieved]
 
-    with open(os.path.join(outdir, f.decode('UTF-8')), 'w') as fout:
+    out_val_normal_dir = os.path.join(outdir, 'val_normal')
+    if not os.path.exists(out_val_normal_dir):
+        os.mkdir(out_val_normal_dir)
+
+    with open(os.path.join(out_val_normal_dir, f.decode('UTF-8').replace('.obj', '')), 'w') as fout:
         [print(r, file=fout) for r in ranking]
 
     return len(ranking)
@@ -227,7 +230,9 @@ def eval_shrec17_output(outdir):
         outdir += '/'
     # outdir_arg = os.path.join('../../', outdir)
     print('Evaluating retrieval...')
-    p = subprocess.Popen(['node', 'evaluate.js', outdir],
+    print(os.path.abspath(outdir))
+    print(['node', 'evaluate.js', os.path.relpath(outdir, start=evaldir)])
+    p = subprocess.Popen(['node', 'evaluate.js', os.path.relpath(outdir, start=evaldir)],
                          cwd=evaldir)
     print('Done.')
     p.wait()
