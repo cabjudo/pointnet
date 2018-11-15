@@ -92,12 +92,12 @@ def axis_angle_to_rotmat(z):
 
 
 def _sample_chords(mesh, num_samples, sampling_method='random'):
-    num_sample_faces = num_samples
+    num_sample_faces = 2*num_samples
     if sampling_method == 'area_weighted':
         p = mesh.area_faces / mesh.area
     else:
         p = np.ones(mesh.faces.shape[0]) / mesh.faces.shape[0]
-    chord_pairs = np.random.choice(mesh.faces.shape[0], size=(num_samples, 2), p=p)
+    chord_pairs = np.random.choice(mesh.faces.shape[0], size=(num_sample_faces, 2), p=p)
 
     sample_faces_left = mesh.faces[chord_pairs[:, 0], :]
     sample_faces_right = mesh.faces[chord_pairs[:, 1], :]
@@ -108,7 +108,20 @@ def _sample_chords(mesh, num_samples, sampling_method='random'):
     c_right = _compute_point_in_triangle(mesh, num_sample_faces, sample_faces_right)
     m = c_left - c_right
 
-    return m, n_p, n_q, num_sample_faces
+    # Filter chords
+    s = np.linalg.norm(m, axis=1)
+    idx = np.where(np.logical_or(s > 0.1, np.arccos(np.sum(n_p * n_q, axis=1)) > 30.0*np.pi/180.0))[0] # Sampling procedure from Improved DROST
+    idx = idx[:num_samples]
+
+    final_m = np.zeros((num_samples, 3))
+    final_n_p = np.zeros((num_samples, 3))
+    final_n_q = np.zeros((num_samples, 3))
+
+    final_m[:len(idx), :] = m[idx, :]
+    final_n_p[:len(idx), :] = n_p[idx, :]
+    final_n_q[:len(idx), :] = n_q[idx, :]
+
+    return final_m, final_n_p, final_n_q, num_samples
 
 
 def _compute_point_in_triangle(mesh, num_sample_faces, face_indexes):
@@ -443,14 +456,14 @@ if __name__ == '__main__':
         all_train_paths, all_test_paths, train_classes, test_classes = get_shrec17_files(
             args.input_dataset_folder, args.num_augment)
 
-    '''num_h5_train = int(np.ceil(len(all_train_paths) / args.batch_size))
+    num_h5_train = int(np.ceil(len(all_train_paths) / args.batch_size))
     d = args.batch_size
     for i in range(num_h5_train):
         create_chordiogram_h5(i, train_classes[i * d:(i + 1) * d],
                               all_train_paths[i * d:(i + 1) * d],
                               dset_folder,
                               args.sampling_method, args.num_samples, args.chord_type, 'train',
-                              args.num_augment, args.cluster)'''
+                              args.num_augment, args.cluster)
 
     num_h5_train = int(np.ceil(len(all_train_paths) / args.batch_size))
     d = args.batch_size
