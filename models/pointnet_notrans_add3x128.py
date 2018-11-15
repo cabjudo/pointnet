@@ -91,7 +91,8 @@ def get_loss(pred, label, end_points, reg_weight=0.001):
 def get_trip_loss(pred, label, features, reg_weight=0.001):
     """ pred: B*NUM_CLASSES,
         label: B, """
-    features = tf.math.l2_normalize(features, axis=-1)
+    epsilon = tf.constant(1e-5)
+    features = features / tf.maximum(tf.norm(features, axis=1), epsilon)
     trip_loss = tf.contrib.losses.metric_learning.triplet_semihard_loss(labels=label, embeddings=features)
     tf.summary.scalar('triplet loss', trip_loss)
 
