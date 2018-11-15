@@ -102,6 +102,7 @@ def get_options():
     parser.add_argument('--train_test', default=None, help='Train test setting: z-z]')
     parser.add_argument('--flip_train_test', default=False, help='Flips training and testing dataset')
     parser.add_argument('--augment', default=False, help='Augment the dataset')
+    parser.add_argument('--drost', default=False, help='Augment the dataset')
     
     # Training options
     parser.add_argument('--gpu', type=int, default=0, help='GPU to use [default: GPU 0]')
@@ -141,6 +142,9 @@ def get_options():
 
     if FLAGS.augment:
         FLAGS.train_path = representation['train_aug']
+    if FLAGS.drost:
+        FLAGS.train_path = representation['train_drost']
+        FLAGS.test_path = representation['test_drost']
 
     FLAGS.shape_names_path = os.path.join(os.path.dirname(os.path.dirname(representation['train'])), 'shape_names.txt')
     FLAGS.num_chord_features = representation['num_chord_features']
