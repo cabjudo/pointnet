@@ -101,14 +101,14 @@ def _sample_chords(mesh, num_samples, sampling_method='random'):
 
     sample_faces_left = mesh.faces[chord_pairs[:, 0], :]
     sample_faces_right = mesh.faces[chord_pairs[:, 1], :]
-    n_p = -mesh.face_normals[chord_pairs[:, 0], :]
-    n_q = -mesh.face_normals[chord_pairs[:, 1], :]
+    n_p = mesh.face_normals[chord_pairs[:, 0], :]
+    n_q = mesh.face_normals[chord_pairs[:, 1], :]
 
     c_left = _compute_point_in_triangle(mesh, num_sample_faces, sample_faces_left)
     c_right = _compute_point_in_triangle(mesh, num_sample_faces, sample_faces_right)
-    m = c_left - c_right
+    m = c_right - c_left
 
-    selection = (np.sum(n_p * m, axis=1) <= np.sum(n_q * m, axis=1)).astype(np.int)
+    selection = (np.abs(np.sum(n_p * m, axis=1)) <= np.abs(np.sum(n_q * m, axis=1))).astype(np.int)
     selection = np.stack(3*(selection,), axis=1)
 
     n_p = n_p*selection + n_q*(1 - selection)
