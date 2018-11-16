@@ -108,6 +108,14 @@ def _sample_chords(mesh, num_samples, sampling_method='random'):
     c_right = _compute_point_in_triangle(mesh, num_sample_faces, sample_faces_right)
     m = c_left - c_right
 
+    selection = (np.sum(n_p * m, axis=1) <= np.sum(n_q * m, axis=1)).astype(np.int)
+    selection = np.stack(3*(selection,), axis=1)
+
+    n_p = n_p*selection + n_q*(1 - selection)
+    n_q = n_q*selection + n_p*(1 - selection)
+
+    m = m*(2*selection - 1)
+
     # Filter chords
     s = np.linalg.norm(m, axis=1)
     idx = np.where(np.logical_or(s > 0.1, np.arccos(np.sum(n_p * n_q, axis=1)) > 30.0*np.pi/180.0))[0] # Sampling procedure from Improved DROST
@@ -456,14 +464,14 @@ if __name__ == '__main__':
         all_train_paths, all_test_paths, train_classes, test_classes = get_shrec17_files(
             args.input_dataset_folder, args.num_augment)
 
-    '''num_h5_train = int(np.ceil(len(all_train_paths) / args.batch_size))
+    num_h5_train = int(np.ceil(len(all_train_paths) / args.batch_size))
     d = args.batch_size
     for i in range(num_h5_train):
         create_chordiogram_h5(i, train_classes[i * d:(i + 1) * d],
                               all_train_paths[i * d:(i + 1) * d],
                               dset_folder,
                               args.sampling_method, args.num_samples, args.chord_type, 'train',
-                              args.num_augment, args.cluster)'''
+                              args.num_augment, args.cluster)
 
     num_h5_train = int(np.ceil(len(all_train_paths) / args.batch_size))
     d = args.batch_size

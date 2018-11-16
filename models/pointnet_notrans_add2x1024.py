@@ -93,7 +93,7 @@ def get_loss(pred, label, end_points, reg_weight=0.001):
     return classify_loss # + mat_diff_loss * reg_weight
 
 
-def get_trip_loss(pred, label, features, reg_weight=0.001):
+def get_trip_loss(pred, label, features, reg_trip=2.0):
     """ pred: B*NUM_CLASSES,
         label: B, """
     epsilon = tf.constant(1e-5)
@@ -105,7 +105,7 @@ def get_trip_loss(pred, label, features, reg_weight=0.001):
     classify_loss = tf.reduce_mean(loss)
     tf.summary.scalar('classify loss', classify_loss)
 
-    return classify_loss  + trip_loss
+    return classify_loss + reg_trip*trip_loss
 
 
 if __name__=='__main__':
