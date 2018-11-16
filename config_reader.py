@@ -74,10 +74,20 @@ def get_darboux_expand_aug(configfile):
     return darboux_expand_aug
 
 
+def get_darboux_sym(configfile):
+    config.read(configfile)
+
+    darboux_expand_sym = dict(config.items('darboux_sym'))
+    darboux_expand_sym['num_chord_features'] = int(darboux_expand_sym['num_chord_features'])
+    darboux_expand_sym['num_classes'] = int(darboux_expand_sym['num_classes'])
+
+    return darboux_expand_sym
+
+
 def get_darboux_expand(configfile):
     config.read(configfile)
     
-    darboux_expand = dict(config.items('darboux_expand'))
+    darboux_expand = dict(config.items('darboux_sym'))
     darboux_expand['num_chord_features'] = int(darboux_expand['num_chord_features'])
     darboux_expand['num_classes'] = int(darboux_expand['num_classes'])
     
@@ -96,6 +106,8 @@ def get_representation(FLAGS):
         rep = get_darboux_aug(configfile)
     if FLAGS.representation == 'darboux_expand_aug':
         rep = get_darboux_expand_aug(configfile)
+    if FLAGS.representation == 'darboux_sym':
+        rep = get_darboux_sym(configfile)
     return rep
     
 
