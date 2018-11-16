@@ -31,7 +31,8 @@ rep_choices = ["plane0",
                "darboux",
                "darboux_aug",
                "darboux_expand",
-               "darboux_expand_aug"]
+               "darboux_expand_aug",
+               "darboux_sym"]
 
 train_test = ["z-z",
               "z-so3",
