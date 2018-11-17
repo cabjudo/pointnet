@@ -89,9 +89,9 @@ def retrieval_one_epoch(sess, ops, num_votes=1, topk=1):
             end_idx = (batch_idx+1) * FLAGS.batch_size
             cur_batch_size = end_idx - start_idx
 
-            rotated_data, _ = perturb_data(FLAGS, current_data[start_idx:end_idx, :, :], 'test')
+            #rotated_data, _ = perturb_data(FLAGS, current_data[start_idx:end_idx, :, :], 'test')
 
-            feed_dict = {ops['pointclouds_pl']: rotated_data,
+            feed_dict = {ops['pointclouds_pl']: current_data[start_idx:end_idx, :, :],
                          ops['labels_pl']: current_label[start_idx:end_idx],
                          ops['is_training_pl']: is_training}
             loss_val, pred_val, feature_map = sess.run([ops['loss'], ops['pred'], ops['feature_map']],
