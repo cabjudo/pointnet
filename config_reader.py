@@ -98,6 +98,8 @@ def get_representation(FLAGS):
     configfile = 'config/' + FLAGS.dataset + '.ini'
     if FLAGS.representation == 'plane0':
         rep = get_plane0(configfile)
+    if FLAGS.representation == 'plane0':
+        rep = get_plane2(configfile)
     if FLAGS.representation == 'darboux':
         rep = get_darboux(configfile)
     if FLAGS.representation == 'darboux_expand':
