@@ -147,6 +147,10 @@ def get_options():
         FLAGS.train_path = representation['train_drost']
         FLAGS.test_path = representation['test_drost']
 
+    if FLAGS.dataset == 'shrec17':
+        FLAGS.retrieval_eval_path = representation['retrieval_eval']
+
+
     FLAGS.shape_names_path = os.path.join(os.path.dirname(os.path.dirname(representation['train'])), 'shape_names.txt')
     FLAGS.num_chord_features = representation['num_chord_features']
     FLAGS.num_classes = representation['num_classes']

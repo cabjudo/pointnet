@@ -24,7 +24,7 @@ FLAGS = options.get_options()
 
 SHAPE_NAMES = [line.rstrip() for line in open(FLAGS.shape_names_path)]
 TRAIN_FILES = provider.getDataFiles(FLAGS.train_path)
-TEST_FILES = provider.getDataFiles(FLAGS.test_path)
+RETRIEVAL_FILES = provider.getDataFiles(FLAGS.retrieval_eval_path)
 
 
 def retrieval():
@@ -73,9 +73,9 @@ def retrieval_one_epoch(sess, ops, num_votes=1, topk=1):
     scores = np.array([[]])
     labels = np.array([[]])
     fnames = np.array([])
-    for fn in range(len(TEST_FILES)):
+    for fn in range(len(RETRIEVAL_FILES)):
         log_string(FLAGS, '----'+str(fn)+'----')
-        current_data, current_label, current_fnames = provider.loadDataFile(TEST_FILES[fn], return_fnames=True)
+        current_data, current_label, current_fnames = provider.loadDataFile(RETRIEVAL_FILES[fn], return_fnames=True)
         current_data = current_data[:, 0:FLAGS.num_point, :]
         current_label = np.squeeze(current_label)
         print(current_data.shape)
