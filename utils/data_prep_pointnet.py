@@ -143,10 +143,10 @@ def extract_points(mesh, num_samples=100, sampling_method='uniform', cluster=Fal
     return chrs, selected_points'''
 
 
-def create_h5(file_num, classes, paths, output_path, sampling_method, num_samples=100,
+def create_h5(dataset, file_num, classes, paths, output_path, sampling_method, num_samples=100,
             mode='train', num_augment=1, cluster=False):
     output_filename = os.path.join(output_path,
-                                   'modelnet40_points_{}_num_samples_{}_{}{}_augment_{}.h5'.format(sampling_method,
+                                   '{}_points_{}_num_samples_{}_{}{}_augment_{}.h5'.format(dataset, sampling_method,
                                                                                                       num_samples, mode,
                                                                                                       file_num,
                                                                                                       num_augment))
@@ -304,7 +304,7 @@ if __name__ == '__main__':
     '''num_h5_train = int(np.ceil(len(all_train_paths) / args.batch_size))
     d = args.batch_size
     for i in range(num_h5_train):
-        create_h5(i, train_classes[i * d:(i + 1) * d],
+        create_h5(args.dataset, i, train_classes[i * d:(i + 1) * d],
                               all_train_paths[i * d:(i + 1) * d],
                               dset_folder,
                               args.sampling_method, args.num_samples, 'train',
@@ -313,7 +313,7 @@ if __name__ == '__main__':
     num_h5_train = int(np.ceil(len(all_train_paths) / args.batch_size))
     d = args.batch_size
     Parallel(n_jobs=-1, timeout=600)(
-        delayed(create_h5)(i, train_classes[i * d:(i + 1) * d],
+        delayed(create_h5)(args.dataset, i, train_classes[i * d:(i + 1) * d],
                                        all_train_paths[i * d:(i + 1) * d],
                            dset_folder,
                            args.sampling_method, args.num_samples, 'train',
@@ -323,7 +323,7 @@ if __name__ == '__main__':
     num_h5_test = int(np.ceil(len(all_test_paths) / args.batch_size))
     d = args.batch_size
     Parallel(n_jobs=-1, timeout=600)(
-        delayed(create_h5)(i, test_classes[i * d:(i + 1) * d],
+        delayed(create_h5)(args.dataset, i, test_classes[i * d:(i + 1) * d],
                                        all_test_paths[i * d:(i + 1) * d],
                            dset_folder,
                            args.sampling_method, args.num_samples, 'test',
