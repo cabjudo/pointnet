@@ -96,6 +96,8 @@ def get_darboux_expand(configfile):
 
 def get_representation(FLAGS):
     configfile = 'config/' + FLAGS.dataset + '.ini'
+    if FLAGS.representation == 'original':
+        rep = get_original(configfile)
     if FLAGS.representation == 'plane0':
         rep = get_plane0(configfile)
     if FLAGS.representation == 'plane2':
