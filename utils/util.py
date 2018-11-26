@@ -32,20 +32,20 @@ def get_bn_decay(FLAGS, batch):
 
 
 def perturb_data(FLAGS, data, mode='train'):
-    if FLAGS.dataset in ["original"]:
+    if FLAGS.representation in ["original"]:
         rotated_data = provider.rotate_point_cloud(data, mode, FLAGS.train_test)
         jittered_data = provider.jitter_point_cloud(rotated_data)
-    elif FLAGS.dataset in ["plane0"]:
+    elif FLAGS.representation in ["plane0"]:
         rotated_data = provider.rotate_plane0_point_cloud(data, mode, FLAGS.train_test)
         jittered_data = provider.jitter_plane0(rotated_data)
-    elif FLAGS.dataset in ["darboux_expand"]:
+    elif FLAGS.representation in ["darboux_expand"]:
         rotated_data = provider.expand_darboux(data)
         jittered_data = provider.jitter_expand_darboux(rotated_data)
     else:
         rotated_data = data
-        if FLAGS.dataset in ["plane1"]:
+        if FLAGS.representation in ["plane1"]:
             jittered_data = provider.jitter_plane1(rotated_data)
-        elif FLAGS.dataset in ["plane2"]:
+        elif FLAGS.representation in ["plane2"]:
             jittered_data = provider.jitter_plane2(rotated_data)
         else:
             jittered_data = provider.jitter_darboux(rotated_data)
