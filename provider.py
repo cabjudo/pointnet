@@ -57,7 +57,7 @@ def rotate_point_cloud(batch_data, mode, rot_type):
           BxNx3 array, rotated batch of point clouds
     """
     
-    if rot_type not in ['None']:
+    if rot_type is not None:
         idx = 0 if mode is 'train' else 1
         rot_type = rot_type.split('-')[idx]
     else:
