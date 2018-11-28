@@ -1,8 +1,10 @@
 import configparser
 import argparse
+import json
 
 config = configparser.ConfigParser()
 
+get_rer
 
 def get_plane0(configfile):
     config.read(configfile)
@@ -96,7 +98,22 @@ def get_darboux_expand(configfile):
 
 def get_representation(FLAGS):
     configfile = 'config/' + FLAGS.dataset + '.ini'
-    if FLAGS.representation == 'original':
+    config.read(configfile)
+
+    rep = dict(config.items(FLAGS.representation))
+    rep['num_chord_features'] = int(rep['num_chord_features'])
+    rep['num_classes'] = int(rep['num_classes'])
+
+    rep['train'] = json.load(rep['train'])
+    rep['test'] = json.load(rep['train'])
+
+    if config.has_section('retrieval_eval'):
+        rep['retrieval_eval'] = json.load(rep['retrieval_eval'])
+
+    if config.has_section('train_aug'):
+        rep['train_aug'] = json.load(rep['train_aug'])
+
+    '''if FLAGS.representation == 'original':
         rep = get_original(configfile)
     if FLAGS.representation == 'plane0':
         rep = get_plane0(configfile)
@@ -111,7 +128,8 @@ def get_representation(FLAGS):
     if FLAGS.representation == 'darboux_expand_aug':
         rep = get_darboux_expand_aug(configfile)
     if FLAGS.representation == 'darboux_sym':
-        rep = get_darboux_sym(configfile)
+        rep = get_darboux_sym(configfile)'''
+
     return rep
     
 

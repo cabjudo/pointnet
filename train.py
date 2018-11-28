@@ -20,14 +20,14 @@ from utils.util import perturb_data
 
 
 FLAGS = options.get_options()
-TRAIN_FILES = provider.getDataFiles(FLAGS.train_path)
-TEST_FILES = provider.getDataFiles(FLAGS.test_path)
+TRAIN_FILES = FLAGS.train_paths
+TEST_FILES = FLAGS.test_paths
 
 # Flips the training and testing datasets
 if FLAGS.flip_train_test:
-    AUX_FLIP = FLAGS.train_path
-    FLAGS.train_path = FLAGS.test_path
-    FLAGS.test_path = AUX_FLIP
+    AUX_FLIP = FLAGS.train_paths
+    FLAGS.train_paths = FLAGS.test_paths
+    FLAGS.test_paths = AUX_FLIP
 
 
 

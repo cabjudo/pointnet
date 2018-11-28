@@ -138,14 +138,14 @@ def get_options():
     # Dataset load from config file
     representation = config_reader.get_representation(FLAGS)
     
-    FLAGS.train_path = representation['train']
-    FLAGS.test_path = representation['test']
+    FLAGS.train_paths = representation['train']
+    FLAGS.test_paths = representation['test']
 
     if FLAGS.augment:
-        FLAGS.train_path = representation['train_aug']
+        FLAGS.train_paths = representation['train_aug']
     if FLAGS.drost:
-        FLAGS.train_path = representation['train_drost']
-        FLAGS.test_path = representation['test_drost']
+        FLAGS.train_paths = representation['train_drost']
+        FLAGS.test_paths = representation['test_drost']
 
     if FLAGS.dataset == 'shrec17':
         FLAGS.retrieval_eval_path = representation['retrieval_eval']
