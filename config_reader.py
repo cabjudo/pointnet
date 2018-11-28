@@ -103,7 +103,7 @@ def get_representation(FLAGS):
     rep['num_classes'] = int(rep['num_classes'])
 
     rep['train'] = json.loads(rep['train'])
-    rep['test'] = json.loads(rep['train'])
+    rep['test'] = json.loads(rep['test'])
 
     if config.has_section('retrieval_eval'):
         rep['retrieval_eval'] = json.load(rep['retrieval_eval'])
