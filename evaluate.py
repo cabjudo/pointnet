@@ -131,8 +131,6 @@ def eval_one_epoch(sess, ops, num_votes=1, topk=1):
                 batch_loss_sum += (loss_val * cur_batch_size / float(num_votes))
 
             # fills confustion matrix
-            print(current_label[start_idx:end_idx].shape, np.argmax(pred_val, 1).shape)
-
             for i, j in zip(current_label[start_idx:end_idx], np.argmax(pred_val, 1)):
                 confusion_matrix[i, j] += 1
 
@@ -162,7 +160,7 @@ def eval_one_epoch(sess, ops, num_votes=1, topk=1):
                     error_cnt += 1
 
     # Saves confusion matrix
-    np.save(os.path.join(FLAGS.model_path, '.confusion_matrix.npy'), confusion_matrix)
+    np.save(FLAGS.model_path + '.confusion_matrix.npy', confusion_matrix)
                 
     log_string(FLAGS, 'eval mean loss: %f' % (loss_sum / float(total_seen)))
     log_string(FLAGS, 'eval accuracy: %f' % (total_correct / float(total_seen)))
