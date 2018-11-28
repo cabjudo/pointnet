@@ -132,7 +132,11 @@ def eval_one_epoch(sess, ops, num_votes=1, topk=1):
 
             # fills confustion matrix
             print(current_label[start_idx:end_idx].shape, np.argmax(pred_val, 1).shape)
-            confusion_matrix += sklearn.metrics.confusion_matrix(current_label[start_idx:end_idx], np.argmax(pred_val, 1))
+
+            for i, j in zip(current_label[start_idx:end_idx], np.argmax(pred_val, 1)):
+                confusion_matrix[i, j] += 1
+
+            #confusion_matrix += sklearn.metrics.confusion_matrix(current_label[start_idx:end_idx], np.argmax(pred_val, 1))
 
             pred_val = np.argmax(batch_pred_sum, 1)
             # Aggregating END
