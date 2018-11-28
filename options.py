@@ -151,7 +151,7 @@ def get_options():
         FLAGS.retrieval_eval_path = representation['retrieval_eval']
 
 
-    FLAGS.shape_names_path = os.path.join(os.path.dirname(os.path.dirname(representation['train'])), 'shape_names.txt')
+    FLAGS.shape_names_path = os.path.join(os.path.dirname(os.path.dirname(representation['train'][0])), 'shape_names.txt')
     FLAGS.num_chord_features = representation['num_chord_features']
     FLAGS.num_classes = representation['num_classes']
 
