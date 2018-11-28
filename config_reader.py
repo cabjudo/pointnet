@@ -4,8 +4,6 @@ import json
 
 config = configparser.ConfigParser()
 
-get_rer
-
 def get_plane0(configfile):
     config.read(configfile)
     
