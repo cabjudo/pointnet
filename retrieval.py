@@ -23,8 +23,8 @@ from sklearn.metrics import precision_recall_curve, precision_score
 FLAGS = options.get_options()
 
 SHAPE_NAMES = [line.rstrip() for line in open(FLAGS.shape_names_path)]
-TRAIN_FILES = provider.getDataFiles(FLAGS.train_path)
-RETRIEVAL_FILES = provider.getDataFiles(FLAGS.retrieval_eval_path)
+TRAIN_FILES = FLAGS.train_paths
+RETRIEVAL_FILES = FLAGS.retrieval_eval_paths
 print('Retrieval test on: {}'.format(RETRIEVAL_FILES))
 
 

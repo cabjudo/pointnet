@@ -19,8 +19,8 @@ from utils.util import log_string
 FLAGS = options.get_options()
 
 SHAPE_NAMES = [line.rstrip() for line in open(FLAGS.shape_names_path)]
-TRAIN_FILES = provider.getDataFiles(FLAGS.train_path)
-TEST_FILES = provider.getDataFiles(FLAGS.test_path)
+TRAIN_FILES = FLAGS.train_paths
+TEST_FILES = FLAGS.test_paths
 
 
 # def log_string(out_str):
