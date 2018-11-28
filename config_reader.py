@@ -102,8 +102,8 @@ def get_representation(FLAGS):
     rep['num_chord_features'] = int(rep['num_chord_features'])
     rep['num_classes'] = int(rep['num_classes'])
 
-    rep['train'] = json.load(rep['train'])
-    rep['test'] = json.load(rep['train'])
+    rep['train'] = json.loads(rep['train'])
+    rep['test'] = json.loads(rep['train'])
 
     if config.has_section('retrieval_eval'):
         rep['retrieval_eval'] = json.load(rep['retrieval_eval'])
