@@ -207,7 +207,7 @@ def get_modelnet_files(input_dataset_folder, num_augment=1):
     return all_train_paths, all_test_paths, train_classes, test_classes
 
 
-def get_shrec17_files(input_dataset_folder, num_augment=1):
+def get_shrec17_files(input_dataset_folder, num_augment=1, perturbed=False):
     '''
 
     Args:
@@ -219,10 +219,11 @@ def get_shrec17_files(input_dataset_folder, num_augment=1):
     '''
 
     # gets all the training/testin filenames and sort them by object id
-    all_train_paths = np.repeat(np.array(glob.glob(os.path.join(input_dataset_folder, 'train_normal/*.obj'))),
+    mode = 'normal' if not perturbed else 'perturbed'
+    all_train_paths = np.repeat(np.array(glob.glob(os.path.join(input_dataset_folder, 'train_{}/*.obj'.format(mode)))),
                                 num_augment)
 
-    all_test_paths = np.array(glob.glob(os.path.join(input_dataset_folder, 'val_normal/*.obj')))
+    all_test_paths = np.array(glob.glob(os.path.join(input_dataset_folder, 'val_{}/*.obj'.format(mode))))
     idx = np.argsort([int(f.split(os.sep)[-1].split('.')[0]) for f in all_test_paths])
     all_test_paths = all_test_paths[idx]
 
@@ -283,6 +284,7 @@ if __name__ == '__main__':
                         help="Calculates of the chords in a shape and cluster them in to 'num_samples' clusters",
                         dest='cluster',
                         default=False, type=bool)
+    parser.add_argument('--perturbed', default=False, help='Uses the perturbed version of shrec17')
     args = parser.parse_args()
 
     assert (args.dataset != 'shrec17' or args.num_augment == 1), 'Augmentation for Shrec17 not supported.'
@@ -299,7 +301,7 @@ if __name__ == '__main__':
             args.input_dataset_folder, args.num_augment)
     elif args.dataset == 'shrec17':
         all_train_paths, all_test_paths, train_classes, test_classes = get_shrec17_files(
-            args.input_dataset_folder, args.num_augment)
+            args.input_dataset_folder, args.num_augment, args.perturbed)
 
     '''num_h5_train = int(np.ceil(len(all_train_paths) / args.batch_size))
     d = args.batch_size
