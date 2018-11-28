@@ -131,7 +131,7 @@ def eval_one_epoch(sess, ops, num_votes=1, topk=1):
                 batch_loss_sum += (loss_val * cur_batch_size / float(num_votes))
 
             # fills confustion matrix
-            confusion_matrix += sklearn.metrics.confusion_matrix(current_label[start_idx:end_idx], pred_val)
+            confusion_matrix += sklearn.metrics.confusion_matrix(current_label[start_idx:end_idx], np.argmax(pred_val, 1))
 
             pred_val = np.argmax(batch_pred_sum, 1)
             # Aggregating END
