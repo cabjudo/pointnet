@@ -51,7 +51,7 @@ def train():
             pred, end_points, feature_map = FLAGS.model.get_model(pointclouds_pl, is_training_pl,
                                                                   input_dims=FLAGS.num_chord_features, num_classes=FLAGS.num_classes, return_feature_map=True)
 
-            if 'shrec17' in FLAGS.dataset:
+            if 'shrec17' in FLAGS.dataset and FLAGS.triplet_loss:
                 loss = FLAGS.model.get_trip_loss(pred, labels_pl, feature_map)
             else:
                 loss = FLAGS.model.get_loss(pred, labels_pl, end_points)
