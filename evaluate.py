@@ -17,8 +17,7 @@ from utils.util import log_string
 
 FLAGS = options.get_options()
 
-SHAPE_NAMES = [line.rstrip() for line in \
-    open(os.path.join(FLAGS.basedir, 'data/modelnet40_ply_hdf5_2048/shape_names.txt'))] 
+SHAPE_NAMES = [line.rstrip() for line in open(FLAGS.shape_names_path)]
 TRAIN_FILES = provider.getDataFiles(FLAGS.train_path)
 TEST_FILES = provider.getDataFiles(FLAGS.test_path)
 
@@ -59,11 +58,11 @@ def evaluate(num_votes):
         is_training_pl = tf.placeholder(tf.bool, shape=())
 
         # simple model
-        pred, end_points = FLAGS.model.get_model(pointclouds_pl, is_training_pl, input_dims=FLAGS.num_chord_features)
+        pred, end_points = FLAGS.model.get_model(pointclouds_pl, is_training_pl, input_dims=FLAGS.num_chord_features, num_classes=FLAGS.num_classes)
         loss = FLAGS.model.get_loss(pred, labels_pl, end_points)
         
         # Add ops to save and restore all the variables.
-        saver = tf.train.Saver()
+        saver = tf.train.Saver(save_relative_paths=True)
         
     # Create a session
     # config = tf.ConfigProto()
@@ -147,7 +146,7 @@ def eval_one_epoch(sess, ops, num_votes=1, topk=1):
                 if pred_val[i-start_idx] != l and FLAGS.visu: # ERROR CASE, DUMP!
                     img_filename = '%d_label_%s_pred_%s.jpg' % (error_cnt, SHAPE_NAMES[l],
                                                            SHAPE_NAMES[pred_val[i-start_idx]])
-                    img_filename = os.path.join(DUMP_DIR, img_filename)
+                    img_filename = os.path.join(FLAGS.dump_dir, img_filename)
                     # output_img = pc_util.point_cloud_three_views(np.squeeze(current_data[i, :, :]))
                     # scipy.misc.imsave(img_filename, output_img)
                     error_cnt += 1

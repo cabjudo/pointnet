@@ -48,9 +48,13 @@ def train():
             tf.summary.scalar('bn_decay', bn_decay)
 
             # Get model and loss 
-            pred, end_points = FLAGS.model.get_model(pointclouds_pl, is_training_pl, bn_decay=bn_decay,
-                                               input_dims=FLAGS.num_chord_features)
-            loss = FLAGS.model.get_loss(pred, labels_pl, end_points)
+            pred, end_points, feature_map = FLAGS.model.get_model(pointclouds_pl, is_training_pl,
+                                                                  input_dims=FLAGS.num_chord_features, num_classes=FLAGS.num_classes, return_feature_map=True)
+
+            if 'shrec17' in FLAGS.dataset:
+                loss = FLAGS.model.get_trip_loss(pred, labels_pl, feature_map)
+            else:
+                loss = FLAGS.model.get_loss(pred, labels_pl, end_points)
             tf.summary.scalar('loss', loss)
 
             correct = tf.equal(tf.argmax(pred, 1), tf.to_int64(labels_pl))
@@ -61,13 +65,13 @@ def train():
             learning_rate = get_learning_rate(FLAGS, batch)
             tf.summary.scalar('learning_rate', learning_rate)
             if FLAGS.optimizer == 'momentum':
-                optimizer = tf.train.MomentumOptimizer(learning_rate, momentum=MOMENTUM)
+                optimizer = tf.train.MomentumOptimizer(learning_rate, momentum=FLAGS.momentum)
             elif FLAGS.optimizer == 'adam':
-                optimizer = tf.train.AdamOptimizer(learning_rate)
+                optimizer = tf.train.AdamOptimizer(FLAGS.learning_rate)
             train_op = optimizer.minimize(loss, global_step=batch)
 
             # Add ops to save and restore all the variables.
-            saver = tf.train.Saver()
+            saver = tf.train.Saver(save_relative_paths=True)
 
         # Create a session
         sess = tf.Session(config=FLAGS.config)
@@ -105,7 +109,7 @@ def train():
                'merged': merged,
                'step': batch}
 
-        assert sess.run(epoch_counter) < 250, 'Training is complete.'
+        assert sess.run(epoch_counter) < FLAGS.max_epoch, 'Training is complete.'
 
         for epoch in range(sess.run(epoch_counter), FLAGS.max_epoch + 1):
             log_string(FLAGS, '**** EPOCH %03d ****' % (epoch))
@@ -180,8 +184,8 @@ def eval_one_epoch(sess, ops, test_writer):
     total_correct = 0
     total_seen = 0
     loss_sum = 0
-    total_seen_class = [0 for _ in range(NUM_CLASSES)]
-    total_correct_class = [0 for _ in range(NUM_CLASSES)]
+    total_seen_class = [0 for _ in range(FLAGS.num_classes)]
+    total_correct_class = [0 for _ in range(FLAGS.num_classes)]
 
     for fn in range(len(TEST_FILES)):
         log_string(FLAGS, '----' + str(fn) + '-----')
@@ -210,7 +214,7 @@ def eval_one_epoch(sess, ops, test_writer):
             correct = np.sum(pred_val == current_label[start_idx:end_idx])
             total_correct += correct
             total_seen += FLAGS.batch_size
-            loss_sum += (loss_val*BATCH_SIZE)
+            loss_sum += (loss_val*FLAGS.batch_size)
             for i in range(start_idx, end_idx):
                 l = current_label[i]
                 total_seen_class[l] += 1

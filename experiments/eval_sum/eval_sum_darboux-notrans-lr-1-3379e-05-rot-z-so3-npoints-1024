@@ -1,0 +1,50 @@
+Model restored.
+----0----
+(2048, 1024, 4)
+2048
+----1----
+(420, 1024, 4)
+420
+eval mean loss: 1.536851
+eval accuracy: 0.568994
+eval avg class acc: 0.528866
+  airplane:	0.990	99
+   bathtub:	0.240	50
+       bed:	0.660	100
+     bench:	0.700	20
+ bookshelf:	0.242	99
+    bottle:	0.810	100
+      bowl:	0.550	20
+       car:	0.870	100
+     chair:	0.850	100
+      cone:	0.650	20
+       cup:	0.400	20
+   curtain:	0.650	20
+      desk:	0.059	85
+      door:	0.850	20
+   dresser:	0.291	86
+flower_pot:	0.150	20
+ glass_box:	0.940	100
+    guitar:	0.950	100
+  keyboard:	0.700	20
+      lamp:	0.400	20
+    laptop:	0.850	20
+    mantel:	0.540	100
+   monitor:	0.610	100
+night_stand:	0.186	86
+    person:	0.500	20
+     piano:	0.350	100
+     plant:	0.677	99
+     radio:	0.400	20
+range_hood:	0.530	100
+      sink:	0.300	20
+      sofa:	0.600	100
+    stairs:	0.450	20
+     stool:	0.150	20
+     table:	0.410	100
+      tent:	0.450	20
+    toilet:	0.830	100
+  tv_stand:	0.100	100
+      vase:	0.770	100
+  wardrobe:	0.000	20
+      xbox:	0.500	20
