@@ -1,4 +1,5 @@
 import os
+import sklearn
 import sys
 import argparse
 import socket
@@ -18,8 +19,8 @@ from utils.util import log_string
 FLAGS = options.get_options()
 
 SHAPE_NAMES = [line.rstrip() for line in open(FLAGS.shape_names_path)]
-TRAIN_FILES = provider.getDataFiles(FLAGS.train_path)
-TEST_FILES = provider.getDataFiles(FLAGS.test_path)
+TRAIN_FILES = FLAGS.train_paths
+TEST_FILES = FLAGS.test_paths
 
 
 # def log_string(out_str):
@@ -90,6 +91,7 @@ def eval_one_epoch(sess, ops, num_votes=1, topk=1):
     total_correct = 0
     total_seen = 0
     loss_sum = 0
+    confusion_matrix = np.zeros((FLAGS.num_classes, FLAGS.num_classes))
     total_seen_class = [0 for _ in range(FLAGS.num_classes)]
     total_correct_class = [0 for _ in range(FLAGS.num_classes)]
     fout = open(os.path.join(FLAGS.dump_dir, 'pred_label.txt'), 'w')
@@ -128,6 +130,12 @@ def eval_one_epoch(sess, ops, num_votes=1, topk=1):
                     batch_pred_classes[el_idx, batch_pred_val[el_idx]] += 1
                 batch_loss_sum += (loss_val * cur_batch_size / float(num_votes))
 
+            # fills confustion matrix
+            for i, j in zip(current_label[start_idx:end_idx], np.argmax(pred_val, 1)):
+                confusion_matrix[i, j] += 1
+
+            #confusion_matrix += sklearn.metrics.confusion_matrix(current_label[start_idx:end_idx], np.argmax(pred_val, 1))
+
             pred_val = np.argmax(batch_pred_sum, 1)
             # Aggregating END
             
@@ -150,6 +158,9 @@ def eval_one_epoch(sess, ops, num_votes=1, topk=1):
                     # output_img = pc_util.point_cloud_three_views(np.squeeze(current_data[i, :, :]))
                     # scipy.misc.imsave(img_filename, output_img)
                     error_cnt += 1
+
+    # Saves confusion matrix
+    np.save(FLAGS.model_path + '.confusion_matrix.npy', confusion_matrix)
                 
     log_string(FLAGS, 'eval mean loss: %f' % (loss_sum / float(total_seen)))
     log_string(FLAGS, 'eval accuracy: %f' % (total_correct / float(total_seen)))

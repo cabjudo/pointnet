@@ -68,8 +68,8 @@ get_pods_cmd = ['kubectl', 'get', 'pods']
 =======
 # dataset = ['shrec17', 'modelnet40']
 dataset = ['modelnet40']
-model_choices = ['pointnet_notrans_add3x64', 'pointnet_notrans_add2x1024', 'pointnet_notrans_add3x128']
-representation = ["darboux"]
+model_choices = ['pointnet_notrans_add3x64']
+representation = ["plane2", "plane0"]
 train_test = ['z-so3']
 
 samples = 1
@@ -87,7 +87,7 @@ for data in dataset:
                     if 'z' in t and data in ['darboux']:
                         continue
 
-                    name = '{}-{}-{}-{}-drost-{}'.format(data[0], arch[17:], rep[0], t, num_points)
+                    name = '{}-{}-{}-{}-drost-sym'.format(data[0], arch[17:], rep, t)
                     name = name.replace('_', '-')
                     name = name.replace('.', '-')
                     name = name.replace('+', '')
@@ -117,8 +117,7 @@ for data in dataset:
                         '--decay_step=200000',
                         '--decay_rate=0.8',
                         '--learning_rate=1e-3',
-                        '--augment=True',
-                        '--drost=True'
+                        '--augment=True'
                     ]
 
                     # Create yaml file

@@ -20,14 +20,14 @@ from utils.util import perturb_data
 
 
 FLAGS = options.get_options()
-TRAIN_FILES = provider.getDataFiles(FLAGS.train_path)
-TEST_FILES = provider.getDataFiles(FLAGS.test_path)
+TRAIN_FILES = FLAGS.train_paths
+TEST_FILES = FLAGS.test_paths
 
 # Flips the training and testing datasets
 if FLAGS.flip_train_test:
-    AUX_FLIP = FLAGS.train_path
-    FLAGS.train_path = FLAGS.test_path
-    FLAGS.test_path = AUX_FLIP
+    AUX_FLIP = FLAGS.train_paths
+    FLAGS.train_paths = FLAGS.test_paths
+    FLAGS.test_paths = AUX_FLIP
 
 
 
@@ -51,7 +51,7 @@ def train():
             pred, end_points, feature_map = FLAGS.model.get_model(pointclouds_pl, is_training_pl,
                                                                   input_dims=FLAGS.num_chord_features, num_classes=FLAGS.num_classes, return_feature_map=True)
 
-            if 'shrec17' in FLAGS.dataset:
+            if 'shrec17' in FLAGS.dataset and FLAGS.triplet_loss:
                 loss = FLAGS.model.get_trip_loss(pred, labels_pl, feature_map)
             else:
                 loss = FLAGS.model.get_loss(pred, labels_pl, end_points)

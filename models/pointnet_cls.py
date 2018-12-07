@@ -67,7 +67,7 @@ def get_model(point_cloud, is_training, bn_decay=None, input_dims=3, return_feat
                                   scope='fc2', bn_decay=bn_decay)
     net = tf_util.dropout(net, keep_prob=0.7, is_training=is_training,
                           scope='dp2')
-    net = tf_util.fully_connected(net, 40, activation_fn=None, scope='fc3')
+    net = tf_util.fully_connected(net, num_classes, activation_fn=None, scope='fc3')
 
     if return_feature_map:
         return net, end_points, feature_map

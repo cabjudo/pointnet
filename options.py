@@ -117,6 +117,7 @@ def get_options():
     parser.add_argument('--optimizer', default='adam', help='adam or momentum [default: adam]')
     parser.add_argument('--decay_step', type=int, default=200000, help='Decay step for lr decay [default: 200000]')
     parser.add_argument('--decay_rate', type=float, default=0.7, help='Decay rate for lr decay [default: 0.8]')
+    parser.add_argument('--triplet_loss', action='store_true', help='Indicates whether to use a triplet loss at training. Only applies to shrec17 dataset')
     
     # Test options
     parser.add_argument('--dump_dir', default='dump', help='dump folder path [dump]')
@@ -138,16 +139,20 @@ def get_options():
     # Dataset load from config file
     representation = config_reader.get_representation(FLAGS)
     
-    FLAGS.train_path = representation['train']
-    FLAGS.test_path = representation['test']
+    FLAGS.train_paths = representation['train']
+    FLAGS.test_paths = representation['test']
 
     if FLAGS.augment:
-        FLAGS.train_path = representation['train_aug']
+        FLAGS.train_paths = representation['train_aug']
     if FLAGS.drost:
-        FLAGS.train_path = representation['train_drost']
-        FLAGS.test_path = representation['test_drost']
+        FLAGS.train_paths = representation['train_drost']
+        FLAGS.test_paths = representation['test_drost']
 
-    FLAGS.shape_names_path = os.path.join(os.path.dirname(os.path.dirname(representation['train'])), 'shape_names.txt')
+    if FLAGS.dataset == 'shrec17':
+        FLAGS.retrieval_eval_path = representation['retrieval_eval']
+
+
+    FLAGS.shape_names_path = os.path.join(os.path.dirname(os.path.dirname(representation['train'][0])), 'shape_names.txt')
     FLAGS.num_chord_features = representation['num_chord_features']
     FLAGS.num_classes = representation['num_classes']
 
